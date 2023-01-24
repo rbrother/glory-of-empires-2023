@@ -7,16 +7,15 @@
 (reg-sub ::board (fn [db] (:board db)))
 
 (defn amend-tile [{:keys [logical-pos system] :as tile}]
-  (assoc tile
-    :screen-pos (tiles/screen-loc logical-pos)
-    :img-src (str "https://rjb-share.s3.eu-north-1.amazonaws.com/glory-of-empires-pics/"
-               (get-in tiles/all-systems [system :image]))))
+  (-> tile
+    (assoc :screen-pos (tiles/screen-loc logical-pos))
+    (merge (dissoc (tiles/all-systems system) :id))))
 
 (defn shift-tiles-zero [tiles]
   (let [min (utils/min-pos (map :screen-pos tiles))]
     (->> tiles
-      (map (fn [tile]
-             (update tile :screen-pos #(utils/sub-vec % min)))))))
+      (mapv (fn [tile]
+              (update tile :screen-pos #(utils/sub-vec % min)))))))
 
 (reg-sub ::board-amended :<- [::board]
   (fn [board _]
