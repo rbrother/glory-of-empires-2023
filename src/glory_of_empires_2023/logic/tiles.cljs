@@ -1,6 +1,5 @@
-(ns glory-of-empires-2023.data.tiles
-  (:require [medley.core :refer [index-by]])
-  )
+(ns glory-of-empires-2023.logic.tiles
+  (:require [medley.core :refer [index-by]]))
 
 (def tile-width 432)
 (def tile-height 376)

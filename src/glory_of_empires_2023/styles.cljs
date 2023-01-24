@@ -6,7 +6,9 @@
 
 (defglobal
   defaults
-  [:body
-   {:color :white
-    :background-color :black}])
+  [:body {:color :white
+          :background-color :black}]
+  [:div.relative {:position "relative"}]
+  [:div.board {:position "relative" :background "red"}]
+  )
 
