@@ -22,5 +22,6 @@
   (fn [board _]
     (->> board
       (vals)
+      (sort-by :id)
       (map amend-tile)
       (shift-tiles-zero))))

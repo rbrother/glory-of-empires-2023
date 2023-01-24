@@ -9,6 +9,10 @@
   [:body {:color :white
           :background-color :black}]
   [:div.relative {:position "relative"}]
-  [:div.board {:position "relative" :background "red"}]
+  [:div.board {:position "relative"}]
+  [:div.tile-id {:position :absolute, :left "112px", :top "30px", :z-order 1
+                 :font-family "Arial, Helvetica, sans-serif"
+                 :font-size "30px"
+                 :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)" }]
   )
 

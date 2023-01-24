@@ -1,12 +1,14 @@
 (ns glory-of-empires-2023.views
   (:require
+    [clojure.string :as str]
     [re-frame.core :refer [subscribe]]
     [glory-of-empires-2023.subs :as subs]))
 
-(defn tile [{[x y] :screen-pos img-src :img-src}]
-
-  [:div {:style {:position "absolute", :left x, :top y}}
-   [:img {:src img-src}]])
+(defn tile [{[x y] :screen-pos, img-src :img-src, id :id}]
+  (let [id-str (str/upper-case (name id))]
+    [:div {:style {:position :absolute, :left x, :top y}}
+     [:img {:src img-src}]
+     [:div.tile-id id-str]]))
 
 (defn board []
   (let [board-data @(subscribe [::subs/board-amended])]
