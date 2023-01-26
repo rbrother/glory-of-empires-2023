@@ -13,6 +13,10 @@
   [:div.tile-id {:position :absolute, :left "112px", :top "30px", :z-order 1
                  :font-family "Arial, Helvetica, sans-serif"
                  :font-size "30px"
-                 :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)" }]
+                 :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)"}]
+  [:div.unit-id {:font-family "Arial, Helvetica, sans-serif"
+                 :text-align "center"
+                 :font-size "20px"
+                 :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)"}]
   )
 

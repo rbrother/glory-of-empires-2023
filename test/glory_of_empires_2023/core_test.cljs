@@ -1,8 +1,20 @@
 (ns glory-of-empires-2023.core-test
   (:require [cljs.test :refer-macros [deftest testing is]]
             [glory-of-empires-2023.logic.tiles :as tiles]
+            [glory-of-empires-2023.logic.utils :as utils]
             [glory-of-empires-2023.logic.map :as board]
             [cljs.pprint :refer [pprint]]))
+
+(deftest utils-test
+  (is (= [{:owner :mentak, :location :b3, :offset [0 0], :id :dr1}
+          {:owner :yssaril, :location :a3, :offset [50 20], :id :cr2}]
+        (utils/vals-with-id
+          {:dr1 {:owner :mentak,
+                 :location :b3
+                 :offset [0 0]}
+           :cr2 {:owner :yssaril
+                 :location :a3
+                 :offset [50 20]}}))))
 
 (deftest tiles-test
   (is (= 290

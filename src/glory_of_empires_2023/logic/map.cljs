@@ -38,8 +38,8 @@
 (defn round-board [rings]
   (make-board rings (fn [pos] (< (logical-distance pos) rings))))
 
-(defn rect-board [ width height ]
-  (let [ [ tile-width tile-height ] systems/tile-size
-        pixel-size [ (* width tile-width 0.75) (* height tile-height) ]
-        bounding-rect [ (utils/mul-vec pixel-size -0.5) (utils/mul-vec pixel-size 0.5) ] ]
-    (make-board (+ width height) (fn [ pos ] (utils/inside-rect? (systems/screen-loc pos) bounding-rect)))))
+(defn rect-board [width height]
+  (let [[tile-width tile-height] systems/tile-size
+        pixel-size [(* width tile-width 0.75) (* height tile-height)]
+        bounding-rect [(utils/mul-vec pixel-size -0.5) (utils/mul-vec pixel-size 0.5)]]
+    (make-board (+ width height) (fn [pos] (utils/inside-rect? (systems/screen-loc pos) bounding-rect)))))
