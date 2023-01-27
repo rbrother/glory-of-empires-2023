@@ -13,13 +13,14 @@
                 (sub-vec (mul-vec image-size 0.5))
                 (add-vec offset))]
     [:div {:style {:position :absolute, :left x, :top y}}
-     [:div [:img {:src (str image-dir "Ships/" color "/Unit-" color "-" image-name ".png")}]]
+     [:div [:img.unit {:src (str image-dir "Ships/" color "/Unit-" color "-" image-name ".png")}]]
      [:div.unit-id (str/upper-case (name id))]]))
 
 (defn tile [{[x y] :screen-pos :keys [image id units]}]
   (let [id-str (str/upper-case (name id))]
-    [:div {:style {:position :absolute, :left x, :top y}}
-     [:img {:src (str image-dir "Tiles/" image)}]
+    [:div.absolute {:style {:left x, :top y}}
+     [:div.tile [:img.tile {:src (str image-dir "Tiles/" image)}]]
+     [:div.highlight [:img {:src (str image-dir "Tiles/Setup/Tile-Setup-Yellow.gif")}]]
      [:div.tile-id id-str]
      (for [unit-data units]
        ^{:key (:id unit-data)} [unit unit-data])]))
