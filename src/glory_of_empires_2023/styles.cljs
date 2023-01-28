@@ -4,25 +4,61 @@
             [garden.units :as units]
             [garden.stylesheet :refer [at-media]]))
 
+(def medium-font "20px")
+(def large-font "30px")
+
+(def default-font
+  {:color :white, :background-color :black
+   :font-family "Arial, Helvetica, sans-serif"
+   :font-size medium-font})
+
 (defglobal
   defaults
-  [:body {:color :white, :background-color :black}]
+  [:body default-font]
+  [:input (assoc default-font :border "1px solid white" :border-radius "3px"
+            :padding "4px" :margin "4px")]
+  [:select (assoc default-font :border "1px solid white" :border-radius "3px"
+             :padding "4px" :margin "4px")]
   [:.relative {:position "relative"}]
   [:.absolute {:position "absolute"}]
+  [:div.flex {:display "flex"}]
+  [:div.dialog-screen {:width "100%", :height "100vh", :z-index 100
+                       :background-color "rgba(0,0,0,.5)"
+                       :position "absolute"}]
+  [:div.dialog {:margin "100px" :height "80vh"
+                :border "8px solid gray"
+                :padding "8px" :background "black"
+                :display "grid" :grid-template-rows "auto 1fr"
+                :grid-row-gap "8px"}]
+  [:div.dialog-title {:text-align "center", :font-size large-font}]
+  [:div.dialog-content-wrap {:overflow "auto" :height "100%"}]
   [:div.board {:position "relative"}]
+  [:div.menu {:color "black" :background "white"
+              :border "2px solid black"}]
+  [:div.menu-item {:padding "8px" :white-space "nowrap"
+                   :font-weight "bold", :cursor "pointer"
+                   :border-bottom "2px solid #dddddd"}]
+  [:div.menu-title {:color "white", :background "#333333",
+                    :padding "8px", :text-align "center", :user-select "none"}]
+  [:div.menu-item:hover {:background "#dddddd"}]
   [:div.tile {:position "absolute"}]
   [:div.highlight {:position "absolute", :z-index -1,
-                   :transform "scale(1.03)", :visibility "hidden"}]
+                   :transform "scale(1.01)", :visibility "hidden"
+                   :filter "brightness(4)"}]
   [:div.tile:hover+div.highlight {:visibility "visible"}]
   [:img.tile {:z-index 1}]
-  [:div.tile-id {:position :absolute, :left "112px", :top "30px", :z-index 2
-                 :font-family "Arial, Helvetica, sans-serif"
-                 :font-size "30px"
+  [:div.tile-id {:position :absolute, :left "315px", :top "94px", :z-index 2
+                 :font-size large-font
                  :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)"}]
-  [:div.unit-id {:font-family "Arial, Helvetica, sans-serif"
-                 :text-align "center"
-                 :font-size "20px"
+  [:div.unit-id {:text-align "center"
                  :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)"}]
   [:img.unit:hover {:filter "brightness(1.2)"}]
-  )
+  [:div.tile-menu-wrap {:position "absolute" :z-index 100
+                        :left "380px", :top "50px"}]
+  [:div.systems-list {:display "flex" :flex-wrap "wrap"}]
+  [:div.systems-filter {:display "flex" :align-items "center" :gap "16px"}]
+  [:div.system-info-box {:margin "8px" :border "4px solid gray"
+                         :padding "4px" :cursor "pointer"
+                         :display "grid" :grid-template-columns "auto 200px"}]
+  [:div.system-info-box:hover {:background "#333333"}])
 

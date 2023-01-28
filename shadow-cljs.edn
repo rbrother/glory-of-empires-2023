@@ -8,6 +8,7 @@
   [garden "1.3.10"]
   [dev.weavejester/medley "1.5.0"]
   [net.dhleong/spade "1.1.0"]
+  [metosin/reagent-dev-tools "1.0.0"]
   [binaryage/devtools "1.0.6"]]
 
  :dev-http
@@ -16,7 +17,7 @@
 
  :builds
  {:app
-  {:target     :browser
+  {:target :browser
    :output-dir "resources/public/js/compiled"
    :asset-path "/js/compiled"
    :modules
@@ -26,13 +27,13 @@
    :dev
    {:compiler-options
     {:closure-defines
-     { }}}}
+     {}}}}
   :browser-test
-  {:target    :browser-test
+  {:target :browser-test
    :ns-regexp "-test$"
    :runner-ns shadow.test.browser
-   :test-dir  "target/browser-test"}
+   :test-dir "target/browser-test"}
   :karma-test
-  {:target    :karma
+  {:target :karma
    :ns-regexp "-test$"
    :output-to "target/karma-test.js"}}}
