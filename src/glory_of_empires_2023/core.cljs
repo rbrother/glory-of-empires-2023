@@ -6,7 +6,7 @@
     [reagent-dev-tools.core :as dev-tools]
     [glory-of-empires-2023.styles] ;; Needed for global styles
     [glory-of-empires-2023.events :as events]
-    [glory-of-empires-2023.views :as views]
+    [glory-of-empires-2023.view.main :as views]
     [glory-of-empires-2023.config :as config]))
 
 (defn dev-setup []

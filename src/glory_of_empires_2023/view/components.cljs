@@ -1,4 +1,4 @@
-(ns glory-of-empires-2023.components
+(ns glory-of-empires-2023.view.components
   (:require
     [re-frame.core :refer [subscribe dispatch reg-event-db]]
     [glory-of-empires-2023.debug :as debug]))
@@ -14,7 +14,7 @@
 
 ;; events
 
-(reg-event-db ::click-background
+(reg-event-db ::click-background [debug/log-event]
   (fn [db [_ target]]
     ;; Background receives click through bubbling even when the dialog
     ;; itself is clicked. We close the dialog only if the target is

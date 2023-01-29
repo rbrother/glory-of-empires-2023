@@ -1,4 +1,4 @@
-(ns glory-of-empires-2023.board
+(ns glory-of-empires-2023.view.board
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx
@@ -8,7 +8,7 @@
     [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance]]
     [glory-of-empires-2023.logic.tiles :as tiles]
     [glory-of-empires-2023.subs :as subs]
-    [glory-of-empires-2023.components :refer [image-dir]]))
+    [glory-of-empires-2023.view.components :refer [image-dir]]))
 
 ;; helpers
 
@@ -72,7 +72,7 @@
            L 110 4"}]])
 
 (defn drag-drop-ok? [{:keys [center-pos]} board-pos]
-  (< (distance (sub-vec board-pos center-pos)) 140.0))
+  (< (distance (sub-vec board-pos center-pos)) 160.0))
 
 (defn handle-on-drag-over [event tile]
   (let [board-pos (event-board-pos event)]
@@ -91,6 +91,7 @@
                             ;; identifies the tile as drop target for the browser
                             :on-drag-enter #(do (.preventDefault %)
                                               (.log js/console "drag-enter" id))
+                            :on-drag-leave #(.log js/console "drag-leave  " id)
                             :on-drag-over #(handle-on-drag-over % tile)
                             :on-drop #(dispatch [::drop-on-tile tile (event-board-pos %)])}]]
      (when hover-on? [:div.highlight tile-highlight])

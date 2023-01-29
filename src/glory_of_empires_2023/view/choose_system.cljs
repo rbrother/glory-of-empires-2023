@@ -1,11 +1,11 @@
-(ns glory-of-empires-2023.choose-system
+(ns glory-of-empires-2023.view.choose-system
   (:require
     [clojure.string :as str]
     [re-frame.core :refer [subscribe dispatch reg-event-db reg-sub]]
     [glory-of-empires-2023.debug :as debug]
     [glory-of-empires-2023.logic.tiles :as tiles]
     [glory-of-empires-2023.subs :as subs]
-    [glory-of-empires-2023.components :as components]))
+    [glory-of-empires-2023.view.components :as components]))
 
 (defn system-info-box [{:keys [id image]}]
   [:div.system-info-box {:on-click #(dispatch [::click-system id])}
@@ -36,7 +36,6 @@
 (defn system-choice-dialog []
   (let [selected-tile @(subscribe [::subs/selected-tile])
         filtered-systems @(subscribe [::systems])]
-    (print "system-choice-dialog")
     [components/dialog {:title [:span "Choose system for location "
                                 (str/upper-case (name selected-tile))]}
      [:div {:style {:display "grid" :grid-template-rows "auto 1fr" :height "100vh"}}
