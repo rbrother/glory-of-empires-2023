@@ -50,7 +50,7 @@
                  :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)"}]
   [:div.unit-id {:text-align "center"
                  :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)"}]
-  [:img.unit {:z-index 10}]
+  [:img.unit {:z-index 10, :cursor "move"}]
   [:img.unit:hover {:filter "brightness(1.5)"}]
   [:div.tile-menu-wrap {:position "absolute" :z-index 100
                         :left "380px", :top "50px"}]
