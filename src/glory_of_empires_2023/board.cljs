@@ -10,13 +10,31 @@
     [glory-of-empires-2023.subs :as subs]
     [glory-of-empires-2023.components :refer [image-dir]]))
 
+;; helpers
+
+(defn round-to-chunk [num]
+  (let [chunk 16]
+    (* chunk (Math/round (/ num chunk)))))
+
+(defn board-pos []
+  (let [board (.getElementById js/document "board")
+        rect (.getBoundingClientRect board)]
+    [(.-left rect), (.-top rect)]))
+
+(defn event-board-pos [event]
+  (let [client-x (-> event .-clientX)
+        client-y (-> event .-clientY)]
+    (sub-vec [client-x client-y] (board-pos))))
+
+;; views
 (defn unit [{:keys [id image-name image-size color offset]}]
   (let [[x y] (-> (mul-vec tiles/tile-size 0.5)
                 (sub-vec (mul-vec image-size 0.5))
                 (add-vec offset))]
     [:div {:style {:position :absolute, :left x, :top y, :z-index 10}}
      [:div [:img.unit {:src (str image-dir "Ships/" color "/Unit-" color "-" image-name ".png")
-                       :on-drag-enter #(dispatch [::drag-unit id])
+                       :on-drag-start #(dispatch [::drag-unit id])
+                       :on-drag-end #(dispatch [::drag-unit-end id])
                        :on-click #(do (dispatch [::click-ship id])
                                     (.stopPropagation %))}]]
      [:div.unit-id (str/upper-case (name id))]]))
@@ -42,7 +60,7 @@
            L 322 4
            L 110 4"}]])
 
-(defn tile [{[x y] :screen-pos :keys [image id units]}]
+(defn tile [{[x y] :screen-pos :keys [image id units center-pos] :as tile}]
   (let [id-str (str/upper-case (name id))
         selected? (= id @(subscribe [::subs/selected-tile]))
         hover-on? (= id @(subscribe [::closest-tile-to-cursor]))]
@@ -54,22 +72,11 @@
                             ;; identifies the tile as drop target for the browser
                             :on-drag-enter #(.preventDefault %)
                             :on-drag-over #(.preventDefault %)
-                            :on-drop #(dispatch [::drop-on-tile id])}]]
+                            :on-drop #(dispatch [::drop-on-tile tile (event-board-pos %)])}]]
      (when hover-on? [:div.highlight tile-highlight])
      [:div.tile-id id-str]
      (for [unit-data units]
        ^{:key (:id unit-data)} [unit unit-data])]))
-
-(defn board-pos []
-  (let [board (.getElementById js/document "board")
-        rect (.getBoundingClientRect board)]
-    [(.-left rect), (.-top rect)]))
-
-(defn handle-board-mouse-move [event]
-  (let [client-x (-> event .-clientX)
-        client-y (-> event .-clientY)
-        local-pos (sub-vec [client-x client-y] (board-pos))]
-    (dispatch [::board-mouse-move local-pos])))
 
 (defn view []
   (let [board-data @(subscribe [::subs/board-amended])]
@@ -77,7 +84,7 @@
      [:h1 "Glory of Empires"]
      [:div.board {:id "board"
                   :style {:transform "scale(1.0)"} ;; allow changing scale
-                  :on-mouse-move handle-board-mouse-move
+                  :on-mouse-move #(dispatch [::board-mouse-move (event-board-pos %)])
                   :on-click #(dispatch [::board-click])}
       (for [tile-data board-data]
         ^{:key (:id tile-data)} [tile tile-data])]]))
@@ -116,26 +123,29 @@
              closest
              nil))}))
 
-(reg-event-db ::click-ship
+(reg-event-db ::click-ship [debug/log-event]
   (fn [db [_ id]]
-    (print "click-ship" id)
     db
     ))
 
-(reg-event-db ::drag-unit
-  (fn [{:keys [drag-unit] :as db} [_ id]]
-    (if drag-unit
-      db ;; already dragging something -> do nothing
-      (assoc db :drag-unit id))))
+(reg-event-db ::drag-unit [debug/log-event]
+  (fn [db [_ id]]
+    (assoc db :drag-unit id)))
 
-(reg-event-db ::drop-on-tile
-  (fn [{:keys [drag-unit] :as db} [_ tile-id]]
-    (print "drop-on-tile" tile-id)
+(reg-event-db ::drag-unit-end [debug/log-event]
+  (fn [db [_ id]]
+    (dissoc db :drag-unit)))
+
+(reg-event-db ::drop-on-tile [debug/log-event]
+  (fn [{:keys [drag-unit] :as db}
+       [_ {tile-id :id tile-center :center-pos} drop-pos]]
     (if-not drag-unit
       db
-      (-> db
-        (assoc-in [:units drag-unit :location] tile-id)
-        (dissoc :drag-unit)))))
+      (let [relative-pos (sub-vec drop-pos tile-center)]
+        (-> db
+          (update-in [:units drag-unit]
+            #(assoc % :location tile-id
+               :offset (mapv round-to-chunk relative-pos))))))))
 
 (reg-event-db ::choose-system [debug/log-event]
   (fn [db _]
