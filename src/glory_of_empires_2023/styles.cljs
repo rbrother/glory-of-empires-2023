@@ -14,7 +14,7 @@
 
 (defglobal
   defaults
-  [:body default-font]
+  [:body (assoc default-font :user-select "none")]
   [:input (assoc default-font :border "1px solid white" :border-radius "3px"
             :padding "4px" :margin "4px")]
   [:select (assoc default-font :border "1px solid white" :border-radius "3px"
@@ -39,20 +39,19 @@
                    :font-weight "bold", :cursor "pointer"
                    :border-bottom "2px solid #dddddd"}]
   [:div.menu-title {:color "white", :background "#333333",
-                    :padding "8px", :text-align "center", :user-select "none"}]
+                    :padding "8px", :text-align "center"}]
   [:div.menu-item:hover {:background "#dddddd"}]
   [:div.tile {:position "absolute"}]
-  [:div.highlight {:position "absolute", :z-index -1,
-                   :transform "scale(1.01)", :visibility "hidden"
-                   :filter "brightness(4)"}]
-  [:div.tile:hover+div.highlight {:visibility "visible"}]
+  [:div.highlight {:position "absolute", :z-index 2,
+                   :width "432px", :height "376px"}]
   [:img.tile {:z-index 1}]
   [:div.tile-id {:position :absolute, :left "315px", :top "94px", :z-index 2
                  :font-size large-font
                  :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)"}]
   [:div.unit-id {:text-align "center"
                  :text-shadow "2px 2px 4px rgba(0, 0, 0, 1)"}]
-  [:img.unit:hover {:filter "brightness(1.2)"}]
+  [:img.unit {:z-index 10}]
+  [:img.unit:hover {:filter "brightness(1.5)"}]
   [:div.tile-menu-wrap {:position "absolute" :z-index 100
                         :left "380px", :top "50px"}]
   [:div.systems-list {:display "flex" :flex-wrap "wrap"}]

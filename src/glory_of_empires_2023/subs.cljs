@@ -4,7 +4,7 @@
     [glory-of-empires-2023.logic.ships :as ships]
     [glory-of-empires-2023.logic.races :as races]
     [glory-of-empires-2023.logic.tiles :as tiles]
-    [glory-of-empires-2023.logic.utils :as utils]))
+    [glory-of-empires-2023.logic.utils :as utils :refer [add-vec]]))
 
 (reg-sub ::board (fn [db _] (:board db)))
 
@@ -40,13 +40,17 @@
       (mapv (fn [tile]
               (update tile :screen-pos #(utils/sub-vec % min)))))))
 
+(defn amend-center-pos [{:keys [screen-pos] :as tile}]
+  (assoc tile :center-pos (add-vec screen-pos tiles/tile-center)))
+
 (reg-sub ::board-amended :<- [::board] :<- [::units-by-location]
   (fn [[board units] _]
     (->> board
       (vals)
       (sort-by :id)
       (map #(amend-tile % units))
-      (shift-tiles-zero))))
+      (shift-tiles-zero)
+      (map amend-center-pos))))
 
 (reg-sub ::selected-tile (fn [db _] (:selected-tile db))) ;; eg. :a3
 

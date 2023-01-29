@@ -1,9 +1,12 @@
 (ns glory-of-empires-2023.logic.tiles
-  (:require [medley.core :refer [index-by]]))
+  (:require [medley.core :refer [index-by]]
+            [glory-of-empires-2023.logic.utils :refer [add-vec sub-vec mul-vec]]))
 
 (def tile-width 432)
 (def tile-height 376)
 (def tile-size [tile-width tile-height])
+
+(def tile-center (mul-vec tile-size 0.5))
 
 (defn screen-loc [[logical-x logical-y]]
   {:pre [(integer? logical-x) (integer? logical-y)]} ;; use malli instrumentation

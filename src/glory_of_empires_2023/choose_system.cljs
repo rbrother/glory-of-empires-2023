@@ -36,9 +36,10 @@
 (defn system-choice-dialog []
   (let [selected-tile @(subscribe [::subs/selected-tile])
         filtered-systems @(subscribe [::systems])]
+    (print "system-choice-dialog")
     [components/dialog {:title [:span "Choose system for location "
                                 (str/upper-case (name selected-tile))]}
-     [:div {:display "grid" :grid-template-rows "auto 1fr" :height "100vh"}
+     [:div {:style {:display "grid" :grid-template-rows "auto 1fr" :height "100vh"}}
       [systems-filter]
       [:div.systems-list
        (for [system filtered-systems]
