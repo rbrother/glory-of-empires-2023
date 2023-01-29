@@ -26,6 +26,15 @@
         client-y (-> event .-clientY)]
     (sub-vec [client-x client-y] (board-pos))))
 
+(defn closest-tile-to [tiles pos]
+  (->> tiles
+    (map (fn [{:keys [center-pos] :as tile}]
+           (let [diff (sub-vec pos center-pos)]
+             (assoc tile :distance (distance diff)))))
+    (sort-by :distance)
+    (first)
+    (:id)))
+
 ;; views
 (defn unit [{:keys [id image-name image-size color offset]}]
   (let [[x y] (-> (mul-vec tiles/tile-size 0.5)
@@ -33,7 +42,9 @@
                 (add-vec offset))]
     [:div {:style {:position :absolute, :left x, :top y, :z-index 10}}
      [:div [:img.unit {:src (str image-dir "Ships/" color "/Unit-" color "-" image-name ".png")
-                       :on-drag-start #(dispatch [::drag-unit id])
+                       :on-drag-start #(do
+                                         (set! (-> % .-dataTransfer .-effectAllowed) "move")
+                                         (dispatch [::drag-unit id]))
                        :on-drag-end #(dispatch [::drag-unit-end id])
                        :on-click #(do (dispatch [::click-ship id])
                                     (.stopPropagation %))}]]
@@ -60,7 +71,15 @@
            L 322 4
            L 110 4"}]])
 
-(defn tile [{[x y] :screen-pos :keys [image id units center-pos] :as tile}]
+(defn drag-drop-ok? [{:keys [center-pos]} board-pos]
+  (< (distance (sub-vec board-pos center-pos)) 140.0))
+
+(defn handle-on-drag-over [event tile]
+  (let [board-pos (event-board-pos event)]
+    (when (drag-drop-ok? tile board-pos)
+      (.preventDefault event))))
+
+(defn tile [{[x y] :screen-pos :keys [image id units] :as tile}]
   (let [id-str (str/upper-case (name id))
         selected? (= id @(subscribe [::subs/selected-tile]))
         hover-on? (= id @(subscribe [::closest-tile-to-cursor]))]
@@ -70,8 +89,9 @@
                             :style (when selected? {:filter "brightness(1.5)"})
                             ;; preventDefault in :on-drag-enter and :on-drag-over
                             ;; identifies the tile as drop target for the browser
-                            :on-drag-enter #(.preventDefault %)
-                            :on-drag-over #(.preventDefault %)
+                            :on-drag-enter #(do (.preventDefault %)
+                                              (.log js/console "drag-enter" id))
+                            :on-drag-over #(handle-on-drag-over % tile)
                             :on-drop #(dispatch [::drop-on-tile tile (event-board-pos %)])}]]
      (when hover-on? [:div.highlight tile-highlight])
      [:div.tile-id id-str]
@@ -92,15 +112,6 @@
 ;; subs
 
 (reg-sub ::board-mouse-pos (fn [db _] (:board-mouse-pos db)))
-
-(defn closest-tile-to [tiles pos]
-  (->> tiles
-    (map (fn [{:keys [center-pos] :as tile}]
-           (let [diff (sub-vec pos center-pos)]
-             (assoc tile :distance (distance diff)))))
-    (sort-by :distance)
-    (first)
-    (:id)))
 
 (reg-sub ::closest-tile-to-cursor
   :<- [::subs/board-amended]
