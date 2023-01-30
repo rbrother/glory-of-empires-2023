@@ -6,10 +6,6 @@
   (let [combine (fn [value1] (map #(vector value1 %) range2))]
     (mapcat combine range1)))
 
-(defn round-to-chunk [num]
-  (let [chunk 16]
-    (* chunk (Math/round (/ num chunk)))))
-
 (defn min-pos
   #_{:test (fn [] (test/is (= [7 -4] (min-pos [[7 12] [8 -4]]))))}
   [vectors] (apply mapv min vectors))

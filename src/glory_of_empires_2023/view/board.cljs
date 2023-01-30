@@ -5,8 +5,8 @@
                            reg-sub inject-cofx]]
     [vimsical.re-frame.cofx.inject :as inject]
     [glory-of-empires-2023.debug :as debug]
-    [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance
-                                               round-to-chunk]]
+    [glory-of-empires-2023.logic.tiles :refer [tile-width tile-height tile-center]]
+    [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance]]
     [glory-of-empires-2023.subs :as subs]
     [glory-of-empires-2023.view.ship :as ship]
     [glory-of-empires-2023.view.components :refer [image-dir]]))
@@ -48,32 +48,39 @@
      :d "M 110 4    L 4 188    L 110 372
          L 322 372  L 428 188  L 322 4    L 110 4"}]])
 
-(defn drag-drop-ok? [{:keys [center-pos]} board-pos]
-  (< (distance (sub-vec board-pos center-pos)) 160.0))
+(def ship-location-size 16)
 
-(defn handle-on-drag-over [event tile]
-  (let [board-pos (event-board-pos event)]
-    (when (drag-drop-ok? tile board-pos)
-      (.preventDefault event))))
+(defn ship-locations [{id :id :as tile}]
+  [:div.absolute
+   (for [x (range 0 tile-width ship-location-size)
+         y (range 0 tile-height ship-location-size)
+         :let [loc-center [(+ x (* 0.5 ship-location-size))
+                           (+ y (* 0.5 ship-location-size))]
+               offset (sub-vec loc-center tile-center)]
+         :when (< (distance offset) 160)]
+     ^{:key [x y]}
+     [:div.ship-loc {:style {:left x, :top y}
+                     ;; preventDefault in :on-drag-enter and :on-drag-over
+                     ;; identifies the tile as drop target for the browser
+                     :on-drag-enter #(do (.preventDefault %)
+                                       (.log js/console "drag-enter" id loc-center))
+                     :on-drag-leave #(.log js/console "drag-leave" id loc-center)
+                     :on-drag-over #(.preventDefault %)
+                     :on-drop #(dispatch [::drop-on-tile tile offset])}])])
 
 (defn tile [{[x y] :screen-pos :keys [image id units] :as tile}]
   (let [id-str (str/upper-case (name id))
         selected? (= id @(subscribe [::subs/selected-tile]))
-        hover-on? (= id @(subscribe [::closest-tile-to-cursor]))]
+        hover-on? (= id @(subscribe [::closest-tile-to-cursor]))
+        dragging-ship @(subscribe [::ship/drag-unit])]
     [:div.absolute {:style {:left x, :top y}}
      (when selected? [:div.tile-menu-wrap [tile-menu id]])
      [:div.tile [:img.tile {:src (str image-dir "Tiles/" image)
-                            :style (when selected? {:filter "brightness(1.5)"})
-                            ;; preventDefault in :on-drag-enter and :on-drag-over
-                            ;; identifies the tile as drop target for the browser
-                            :on-drag-enter #(do (.preventDefault %)
-                                              (.log js/console "drag-enter" id))
-                            :on-drag-leave #(.log js/console "drag-leave  " id)
-                            :on-drag-over #(handle-on-drag-over % tile)
-                            :on-drop #(dispatch [::drop-on-tile tile (event-board-pos %)])}]]
-     (when hover-on? [:div.highlight tile-highlight])
+                            :style (when selected? {:filter "brightness(1.5)"})}]]
      [:div.tile-id id-str]
-     [ship/view units]]))
+     (when dragging-ship [ship-locations tile])
+     [ship/view units]
+     (when hover-on? [:div.highlight tile-highlight])]))
 
 (defn view []
   (let [board-data @(subscribe [::subs/board-amended])]
@@ -113,14 +120,12 @@
 
 (reg-event-db ::drop-on-tile [debug/log-event]
   (fn [{:keys [drag-unit] :as db}
-       [_ {tile-id :id tile-center :center-pos} drop-pos]]
-    (if-not drag-unit
-      db
-      (let [relative-pos (sub-vec drop-pos tile-center)]
-        (-> db
-          (update-in [:units drag-unit]
-            #(assoc % :location tile-id
-               :offset (mapv round-to-chunk relative-pos))))))))
+       [_ {tile-id :id} drop-pos]]
+    (cond-> db
+      drag-unit (update-in [:units drag-unit]
+                  #(assoc %
+                     :location tile-id
+                     :offset drop-pos)))))
 
 (reg-event-db ::choose-system [debug/log-event]
   (fn [db _]

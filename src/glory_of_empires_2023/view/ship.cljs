@@ -4,8 +4,7 @@
     [glory-of-empires-2023.debug :as debug]
     [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx
                            reg-sub inject-cofx]]
-    [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance
-                                               round-to-chunk]]
+    [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance]]
     [glory-of-empires-2023.logic.tiles :as tiles]
     [glory-of-empires-2023.view.components :refer [image-dir]]))
 
@@ -27,6 +26,10 @@
   [:<>
    (for [u units]
      ^{:key (:id u)} [unit u])])
+
+;; subs
+
+(reg-sub ::drag-unit (fn [db _] (:drag-unit db)))
 
 ;; event
 
