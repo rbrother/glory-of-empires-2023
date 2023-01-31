@@ -76,7 +76,7 @@
 
 (defn tile [{[x y] :screen-pos :keys [image id units] :as tile}]
   (let [id-str (str/upper-case (name id))
-        selected? (= id @(subscribe [::subs/selected-tile]))
+        selected? @(subscribe [::subs/selected-tile? id])
         hover-on? @(subscribe [::hover-on-tile? id])]
     [:div.absolute {:style {:left x, :top y}}
      (when selected? [:div.tile-menu-wrap [tile-menu id]])
