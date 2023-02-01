@@ -55,6 +55,9 @@
 (reg-sub ::selected-tile
   (fn [db _] (:selected-tile db))) ;; eg. :a3
 
+(reg-sub ::tile-click-pos
+  (fn [db _] (:tile-click-pos db))) ;; eg. [24, 167]
+
 (reg-sub ::selected-tile? :<- [::selected-tile]
   (fn [selected-tile [_ tile-id]] (= tile-id selected-tile))) ;; eg. :a3
 

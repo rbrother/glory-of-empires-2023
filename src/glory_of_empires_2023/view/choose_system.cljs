@@ -81,4 +81,4 @@
   (fn [{tile :selected-tile :as db} [_ system-id]]
     (-> db
       (assoc-in [:board tile :system] system-id)
-      (dissoc :dialog, :choose-system))))
+      (dissoc :dialog, :choose-system, :selected-tile))))

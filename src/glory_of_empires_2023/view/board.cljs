@@ -31,8 +31,7 @@
            (let [diff (sub-vec pos center-pos)]
              (assoc tile :distance (distance diff)))))
     (sort-by :distance)
-    (first)
-    (:id)))
+    (first)))
 
 (def tile-highlight
   [:svg {:viewBox "0 0 432 376"}
@@ -71,7 +70,7 @@
         selected? @(subscribe [::subs/selected-tile? id])
         hover-on? @(subscribe [::hover-on-tile? id])]
     [:div.absolute {:style {:left x, :top y}}
-     (when selected? [:div.tile-menu-wrap [tile-menu/view id]])
+     (when selected? [tile-menu/view id])
      [:div.tile [:img.tile {:src (str image-dir "Tiles/" image)
                             :style (when selected? {:filter "brightness(1.5)"})}]]
      [:div.tile-id id-str]
@@ -104,7 +103,7 @@
 
 (reg-sub ::hover-on-tile? :<- [::closest-tile-to-cursor]
   (fn [closest-tile [_ tile-id]]
-    (= closest-tile tile-id)))
+    (= (:id closest-tile) tile-id)))
 
 (reg-sub ::drag-target
   (fn [{:keys [drag-target]} [_ tile-id]]
@@ -121,12 +120,13 @@
   ;; re-frame gives for some reason warning on using sub even when we do it
   ;; in the recommended inject-cofx way. Seems to work ok though.
   [debug/log-event, (inject-cofx ::inject/sub [::closest-tile-to-cursor])]
-  (fn [{{earlier-tile :selected-tile :as db} :db,
+  (fn [{{earlier-tile :selected-tile :keys [board-mouse-pos] :as db} :db,
         closest ::closest-tile-to-cursor} _]
-    {:db (assoc db :selected-tile
-           (if (not= earlier-tile closest)
-             closest
-             nil))}))
+    {:db (assoc db
+           :selected-tile (if (not= earlier-tile (:id closest))
+                            (:id closest)
+                            nil)
+           :tile-click-pos (sub-vec board-mouse-pos (:screen-pos closest)))}))
 
 (reg-event-db ::drag-enter
   (fn [db [_ tile-id loc-center]]

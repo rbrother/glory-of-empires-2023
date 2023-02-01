@@ -53,8 +53,7 @@
   [:img.unit {:z-index 10, :cursor "move"}]
   [:img.unit:hover {:filter "brightness(1.5)"}]
   [:div.ship-drop-loc {:position :absolute, :border "1px solid #ffffff40", :z-index 3}]
-  [:div.tile-menu-wrap {:position "absolute" :z-index 20
-                        :left "380px", :top "50px"}]
+  [:div.tile-menu-wrap {:position "absolute" :z-index 20}]
   [:div.systems-list {:display "flex" :flex-wrap "wrap"}]
   [:div.systems-filter {:display "flex" :align-items "center" :gap "16px"}]
   [:div.system-info-box {:margin "8px" :border "4px solid gray"
