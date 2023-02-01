@@ -52,7 +52,10 @@
       (shift-tiles-zero)
       (map amend-center-pos))))
 
-(reg-sub ::selected-tile?
-  (fn [db [_ tile-id]] (= tile-id (:selected-tile db)))) ;; eg. :a3
+(reg-sub ::selected-tile
+  (fn [db _] (:selected-tile db))) ;; eg. :a3
+
+(reg-sub ::selected-tile? :<- [::selected-tile]
+  (fn [selected-tile [_ tile-id]] (= tile-id selected-tile))) ;; eg. :a3
 
 (reg-sub ::dialog (fn [db _] (:dialog db)))

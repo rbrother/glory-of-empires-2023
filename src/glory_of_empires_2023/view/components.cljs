@@ -12,6 +12,14 @@
     (when title [:div.dialog-title title])
     (into [:div.dialog-content-wrap] content)]])
 
+(defn menu-item [text dispatch-vector]
+  [:div.menu-item
+   {:on-click (fn [event]
+                (dispatch dispatch-vector)
+                (.stopPropagation event) ;; prevent selection of another tile
+                )}
+   text])
+
 ;; events
 
 (reg-event-db ::click-background [debug/log-event]

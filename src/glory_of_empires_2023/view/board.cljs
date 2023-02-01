@@ -10,6 +10,7 @@
     [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance]]
     [glory-of-empires-2023.subs :as subs]
     [glory-of-empires-2023.view.ship :as ship]
+    [glory-of-empires-2023.view.tile-menu :as tile-menu]
     [glory-of-empires-2023.view.components :refer [image-dir]]))
 
 ;; helpers
@@ -32,15 +33,6 @@
     (sort-by :distance)
     (first)
     (:id)))
-
-(defn tile-menu [tile-id]
-  [:div.menu
-   [:div.menu-title "Tile " (str/upper-case (name tile-id))]
-   [:div.menu-item {:on-click (fn [event]
-                                (dispatch [::choose-system])
-                                (.stopPropagation event) ;; prevent selection of another tile
-                                )}
-    "Choose System..."]])
 
 (def tile-highlight
   [:svg {:viewBox "0 0 432 376"}
@@ -79,7 +71,7 @@
         selected? @(subscribe [::subs/selected-tile? id])
         hover-on? @(subscribe [::hover-on-tile? id])]
     [:div.absolute {:style {:left x, :top y}}
-     (when selected? [:div.tile-menu-wrap [tile-menu id]])
+     (when selected? [:div.tile-menu-wrap [tile-menu/view id]])
      [:div.tile [:img.tile {:src (str image-dir "Tiles/" image)
                             :style (when selected? {:filter "brightness(1.5)"})}]]
      [:div.tile-id id-str]
@@ -150,7 +142,3 @@
                      :location tile-id
                      :offset drop-pos))
       true (dissoc :drag-target))))
-
-(reg-event-db ::choose-system [debug/log-event]
-  (fn [db _]
-    (assoc db :dialog :choose-system)))
