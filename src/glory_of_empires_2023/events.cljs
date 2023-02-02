@@ -5,6 +5,9 @@
 
 (reg-event-db ::initialize-db
   (fn [_ _] {:board (board/round-board 3)
+             :players {:mentak {}
+                       :yssaril {}
+                       }
              :units {:dr1 {:type :dr
                            :owner :mentak,
                            :location :b3

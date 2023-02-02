@@ -33,7 +33,7 @@
               :value text-filter
               :on-change #(dispatch [::change-system-text-filter (-> % .-target .-value)])}]]))
 
-(defn system-choice-dialog []
+(defn view []
   (let [selected-tile @(subscribe [::subs/selected-tile])
         filtered-systems @(subscribe [::systems])]
     [components/dialog {:title [:span "Choose system for location "
@@ -58,6 +58,7 @@
     (->> systems
       (filter (fn [{:keys [id]}]
                 (re-find pat (name id)))))))
+
 (reg-sub ::systems :<- [::type-filter] :<- [::text-filter]
   (fn [[type-filter text-filter] _]
     (cond->> tiles/all-systems-list

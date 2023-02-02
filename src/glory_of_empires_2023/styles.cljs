@@ -17,11 +17,18 @@
   [:body (assoc default-font :user-select "none")]
   [:input (assoc default-font :border "1px solid white" :border-radius "3px"
             :padding "4px" :margin "4px")]
+  [:button (assoc default-font :border "1px solid white" :border-radius "3px"
+             :padding "4px 8px 4px 8px" :margin "4px" :min-width "32px")]
+  [:button:hover {:filter "brightness(1.5)"}]
+  [:button.ok {:margin "8px" :width "150px", :background "#050"}]
+  [:button.cancel {:margin "8px" :width "150px", :background "#500"}]
   [:select (assoc default-font :border "1px solid white" :border-radius "3px"
              :padding "4px" :margin "4px")]
   [:.relative {:position "relative"}]
   [:.absolute {:position "absolute"}]
-  [:div.flex {:display "flex"}]
+  [:.pad {:padding "8px"}]
+  [:.bold {:font-weight "bold"}]
+  [:div.flex {:display "flex" :align-items "center"}]
   [:div.dialog-screen {:width "100%", :height "100vh", :z-index 100
                        :background-color "rgba(0,0,0,.5)"
                        :position "absolute"}]
@@ -59,5 +66,10 @@
   [:div.system-info-box {:margin "8px" :border "4px solid gray"
                          :padding "4px" :cursor "pointer"
                          :display "grid" :grid-template-columns "auto 200px"}]
+  [:div.ship-types-grid {:display "grid",
+                         :grid-template-columns "auto auto 230px auto auto auto
+                         auto auto auto auto auto 1fr"
+                         :justify-items "stretch"}]
+  [:div.ship-type-grid-item {:border "2px solid #666", :padding "8px"}]
   [:div.system-info-box:hover {:background "#333333"}])
 

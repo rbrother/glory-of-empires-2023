@@ -5,6 +5,17 @@
 
 (def image-dir "https://rjb-share.s3.eu-north-1.amazonaws.com/glory-of-empires-pics/")
 
+(defn handler-no-propagate [dispatch-vector]
+  (fn [event]
+    (dispatch dispatch-vector)
+    (.stopPropagation event) ;; prevent eg. click being handled by parents also
+    ))
+
+(defn ok-cancel [dispatch-ok dispatch-cancel]
+  [:div.flex {:style {:justify-content "center"}}
+   [:button.ok {:on-click (handler-no-propagate dispatch-ok)} "OK"]
+   [:button.cancel {:on-click (handler-no-propagate dispatch-cancel)} "Cancel"]])
+
 (defn dialog [{:keys [title] :as opt} & content]
   [:div.dialog-screen {:id "dialog-background"
                        :on-click #(dispatch [::click-background (-> % .-target .-id)])}
@@ -14,10 +25,7 @@
 
 (defn menu-item [text dispatch-vector]
   [:div.menu-item
-   {:on-click (fn [event]
-                (dispatch dispatch-vector)
-                (.stopPropagation event) ;; prevent selection of another tile
-                )}
+   {:on-click (handler-no-propagate dispatch-vector)}
    text])
 
 ;; events

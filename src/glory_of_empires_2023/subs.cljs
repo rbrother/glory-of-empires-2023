@@ -28,11 +28,14 @@
       (map amend-unit)
       (group-by :location))))
 
-(defn amend-tile [{:keys [id logical-pos system] :as tile} units]
-  (-> tile
-    (assoc :screen-pos (tiles/screen-loc logical-pos)
-      :units (get units id))
-    (merge (dissoc (tiles/all-systems system) :id))))
+(defn amend-tile [{:keys [id logical-pos system] :as tile} all-units]
+  (let [units (get all-units id)]
+    (-> tile
+      (assoc
+        :screen-pos (tiles/screen-loc logical-pos)
+        :units units
+        :owner (:owner (first units))) ;; TODO: Also take flag-tokens into account if no units
+      (merge (-> system (tiles/all-systems) (dissoc :id))))))
 
 (defn shift-tiles-zero [tiles]
   (let [min (utils/min-pos (map :screen-pos tiles))]
@@ -54,6 +57,10 @@
 
 (reg-sub ::selected-tile
   (fn [db _] (:selected-tile db))) ;; eg. :a3
+
+(reg-sub ::selected-tile-owner :<- [::selected-tile] :<- [::units-by-location]
+  (fn [[tile units-by-loc] _]
+    (-> (get units-by-loc tile) (first) (:owner))))
 
 (reg-sub ::tile-click-pos
   (fn [db _] (:tile-click-pos db))) ;; eg. [24, 167]

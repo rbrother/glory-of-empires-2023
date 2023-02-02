@@ -12,10 +12,15 @@
      {:style {:left (+ x 20), :top (- y 20)}}
      [:div.menu
       [:div.menu-title "Tile " (str/upper-case (name tile-id))]
-      [comp/menu-item "Choose System..." [::choose-system]]]]))
+      [comp/menu-item "Choose System..." [::choose-system]]
+      [comp/menu-item "Add ships..." [::add-ships]]]]))
 
 ;; events
 
 (reg-event-db ::choose-system [debug/log-event]
   (fn [db _]
     (assoc db :dialog :choose-system)))
+
+(reg-event-db ::add-ships [debug/log-event]
+  (fn [db _]
+    (assoc db :dialog :add-ships)))

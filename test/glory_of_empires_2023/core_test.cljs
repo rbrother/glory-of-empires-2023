@@ -3,6 +3,7 @@
             [glory-of-empires-2023.logic.tiles :as tiles]
             [glory-of-empires-2023.logic.utils :as utils]
             [glory-of-empires-2023.logic.map :as board]
+            [glory-of-empires-2023.logic.ships :as ships]
             [cljs.pprint :refer [pprint]]))
 
 (deftest utils-test
@@ -55,3 +56,14 @@
          :b3 {:logical-pos [-1 0], :system :setup-yellow, :id :b3},
          :d3 {:logical-pos [1 0], :system :setup-yellow, :id :d3},
          :a4 {:logical-pos [-2 1], :system :setup-light-blue, :id :a4}})))
+
+(deftest add-ships-test
+  (is (= (ships/create-ships
+           {:fi3 {:type :fi, :owner :norr, :location :a1}}
+           {:fi 2, :de 1, :cr 2} :b3 :mentak)
+        {:fi3 {:type :fi, :owner :norr, :location :a1}
+         :fi4 {:type :fi, :owner :mentak, :location :b3, :offset [0 0]}
+         :fi5 {:type :fi, :owner :mentak, :location :b3, :offset [0 0]}
+         :de1 {:type :de, :owner :mentak, :location :b3, :offset [0 0]}
+         :cr1 {:type :cr, :owner :mentak, :location :b3, :offset [0 0]}
+         :cr2 {:type :cr, :owner :mentak, :location :b3, :offset [0 0]}})))
