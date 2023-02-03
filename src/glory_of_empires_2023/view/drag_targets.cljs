@@ -33,14 +33,23 @@
                 (map (fn [n] {:y y, :x (+ x (* n ship-location-size))})))))
     (vec)))
 
+(defn space-location [pos planet-locs]
+  (->> planet-locs
+    (some (fn [planet-loc]
+            (< (distance (sub-vec pos planet-loc)) 80)))
+    (not)))
+
 (defn view [{id :id :as tile}]
   (let [dragging-ship @(subscribe [::ship/drag-unit])
-        current-drag-loc @(subscribe [::drag-target id])]
+        current-drag-loc @(subscribe [::drag-target id])
+        planet-locs (->> tile (:planets) (vals) (map :loc)
+                      (map #(add-vec % tile-center)))]
     [:div.absolute {:style {:visibility (if dragging-ship :visible :hidden)}}
      (for [{:keys [x y]} drag-target-locs
            :let [loc-center [(+ x (* 0.5 ship-location-size))
                              (+ y (* 0.5 ship-location-size))]
-                 offset (sub-vec loc-center tile-center)]]
+                 offset (sub-vec loc-center tile-center)]
+           :when (space-location loc-center planet-locs)]
        (let [this-current? (= loc-center current-drag-loc)]
          ^{:key [x y]}
          [:div.ship-drop-loc

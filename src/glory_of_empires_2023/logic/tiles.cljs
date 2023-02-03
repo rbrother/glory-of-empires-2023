@@ -254,21 +254,21 @@
 
    ; 3 planets
    {:id :ashtroth-loki-abaddon, :type :3planet, :image "3planet/Tile-Ashtroth-Loki-Abaddon.gif"
-    :planets {:ashtroth {:res 2 :inf 0 :loc [0 -50]}
-              :loki {:res 1 :inf 2 :loc [50 50]}
-              :abaddon {:res 1 :inf 0 :tech {:red 1} :loc [-50 -50]}}}
+    :planets {:ashtroth {:res 2 :inf 0 :loc [0 -100]}
+              :loki {:res 1 :inf 2 :loc [70 40]}
+              :abaddon {:res 1 :inf 0 :tech {:red 1} :loc [-90 60]}}}
    {:id :rigel, :type :3planet, :image "3planet/Tile-Rigel.gif"
-    :planets {:rigel-i {:res 0 :inf 1 :tech {:green 1} :loc [0 -50]}
-              :rigel-ii {:res 1 :inf 2 :loc [50 50]}
-              :rigel-iii {:res 1 :inf 1 :tech {:blue 1} :loc [-50 -50]}}}
+    :planets {:rigel-i {:res 0 :inf 1 :tech {:green 1} :loc [0 -100]}
+              :rigel-ii {:res 1 :inf 2 :loc [70 40]}
+              :rigel-iii {:res 1 :inf 1 :tech {:blue 1} :loc [-90 60]}}}
    {:id :elder-uhuru-amani, :type :3planet, :image "3planet/Tile-Elder-Uhuru-Amani.gif"
-    :planets {:elder-one {:res 0 :inf 0 :tech {:green 3} :loc [0 -50]}
-              :uhuru {:res 1 :inf 0 :loc [-50 60]}
-              :amani {:res 0 :inf 1 :loc [50 50]}}}
+    :planets {:elder-one {:res 0 :inf 0 :tech {:green 3} :loc [0 -100]}
+              :amani {:res 0 :inf 1 :loc [70 40]}
+              :uhuru {:res 1 :inf 0 :loc [-90 60]}}}
    {:id :tianshang-tiangu-changtian, :type :3planet, :image "3planet/Tile-Tianshang-Tiangu-Changtian.gif"
-    :planets {:tianshang {:res 1 :inf 1 :loc [50 -50]}
-              :tiangu-xing {:res 1 :inf 1 :loc [-70 0]}
-              :changtian {:res 2 :inf 0 :special "Exhaust for 2 TG" :loc [50 50]}}}])
+    :planets {:tianshang {:res 1 :inf 1 :loc [50 -80]}
+              :tiangu-xing {:res 1 :inf 1 :loc [-100 0]}
+              :changtian {:res 2 :inf 0 :special "Exhaust for 2 TG" :loc [50 80]}}}])
 
 (def home-systems-arr
   [

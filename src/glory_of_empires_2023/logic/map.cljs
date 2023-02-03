@@ -14,6 +14,7 @@
   (let [abs-x (Math/abs logical-x)
         abs-y (Math/abs logical-y)]
     (if (pos? (* logical-x logical-y)) (+ abs-x abs-y) (max abs-x abs-y))))
+
 (def setup-tiles [:setup-red :setup-yellow :setup-light-blue :setup-medium-blue :setup-dark-blue])
 
 (defn- setup-system [pos tile-index]
