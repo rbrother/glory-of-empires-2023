@@ -57,7 +57,7 @@
   (let [board-data @(subscribe [::subs/board-amended])]
     [:<>
      [:h1 "Glory of Empires"]
--     [:div.board {:id "board"
+     [:div.board {:id "board"
                   :on-mouse-move #(dispatch [::board-mouse-move (event-board-pos %)])
                   ;; mouse-move event are not generated during drag operation,
                   ;; but drag-over are generated in similar way. We need that to
