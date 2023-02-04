@@ -17,6 +17,7 @@
                  [garden "1.3.10"]
                  [net.dhleong/spade "1.1.0"]
                  [medley "1.3.0"]
+                 [hashp "0.2.2"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
                  [org.clojure/data.avl "0.1.0"]
                  [com.rpl/specter "1.1.4"]
