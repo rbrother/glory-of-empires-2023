@@ -30,28 +30,34 @@
   (->> drag-target-rows
     (mapcat (fn [{:keys [x y count]}]
               (->> (range count)
-                (map (fn [n] {:y y, :x (+ x (* n ship-location-size))})))))
+                (map (fn [n] [(+ x (* n ship-location-size)), y])))))
     (vec)))
 
-(defn space-location [pos planet-locs]
+(defn space-location? [pos planet-locs]
   (->> planet-locs
     (some (fn [planet-loc]
             (< (distance (sub-vec pos planet-loc)) 80)))
     (not)))
 
+(defn space-locations [tile]
+  (let [planet-locs (->> tile (:planets) (vals) (map :loc)
+                      (map #(add-vec % tile-center)))
+        target-center (mul-vec [ship-location-size ship-location-size] 0.5)]
+    (->> drag-target-locs
+      (filter (fn [loc]
+                (space-location? (add-vec loc target-center) planet-locs)))
+      (vec))))
+
 (defn view [{id :id :as tile}]
   (let [dragging-ship @(subscribe [::ship/drag-unit])
-        current-drag-loc @(subscribe [::drag-target id])
-        planet-locs (->> tile (:planets) (vals) (map :loc)
-                      (map #(add-vec % tile-center)))]
+        current-drag-loc @(subscribe [::drag-target id])]
     [:div.absolute {:style {:visibility (if dragging-ship :visible :hidden)}}
-     (for [{:keys [x y]} drag-target-locs
+     (for [[x y] (space-locations tile)
            :let [loc-center [(+ x (* 0.5 ship-location-size))
-                             (+ y (* 0.5 ship-location-size))]
-                 offset (sub-vec loc-center tile-center)]
-           :when (space-location loc-center planet-locs)]
+                              (+ y (* 0.5 ship-location-size))]
+                 offset (sub-vec loc-center tile-center)]]
        (let [this-current? (= loc-center current-drag-loc)]
-         ^{:key [x y]}
+         ^{:key loc-center}
          [:div.ship-drop-loc
           {:style (assoc-some {:left x, :top y, :width (dec ship-location-size),
                                :height (dec ship-location-size)}
