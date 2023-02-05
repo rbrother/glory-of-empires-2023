@@ -6,12 +6,12 @@
     [glory-of-empires-2023.debug :as debug]
     [glory-of-empires-2023.logic.ships :as ships]
     [glory-of-empires-2023.subs :as subs]
-    [glory-of-empires-2023.view.components :refer [image-dir handler-no-propagate] :as components]))
+    [glory-of-empires-2023.view.components
+     :refer [image-dir handler-no-propagate] :as components]))
 
 ;; helpers
 
 (defn dec-count [n] (max (dec n) 0))
-
 
 ;; views
 
@@ -114,9 +114,9 @@
   (fn [db [_ ship-type]] (update-in db [:prod-counts ship-type] dec-count)))
 
 (reg-event-db ::ok [debug/log-event]
-  (fn [{:keys [prod-counts selected-tile] :as db} [_ owner]]
+  (fn [{:keys [prod-counts selected-tile board] :as db} [_ owner]]
     (-> db
-      (update :units #(ships/create-ships % prod-counts selected-tile owner))
+      (update :units #(ships/create-ships % prod-counts (get board selected-tile) owner))
       (dissoc :dialog :prod-counts :selected-tile))))
 
 (reg-event-db ::cancel [debug/log-event]

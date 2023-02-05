@@ -59,11 +59,14 @@
 
 (deftest add-ships-test
   (is (= (ships/create-ships
-           {:fi3 {:type :fi, :owner :norr, :location :a1}}
-           {:fi 2, :de 1, :cr 2} :b3 :mentak)
-        {:fi3 {:type :fi, :owner :norr, :location :a1}
-         :fi4 {:type :fi, :owner :mentak, :location :b3, :offset [0 0]}
-         :fi5 {:type :fi, :owner :mentak, :location :b3, :offset [0 0]}
-         :de1 {:type :de, :owner :mentak, :location :b3, :offset [0 0]}
-         :cr1 {:type :cr, :owner :mentak, :location :b3, :offset [0 0]}
-         :cr2 {:type :cr, :owner :mentak, :location :b3, :offset [0 0]}})))
+           {:fi3 {:type :fi, :owner :norr, :location :b3, :offset [129 -8]}}
+           {:fi 2, :de 1, :cr 2}
+           {:id :b3, :logical-pos [0 1], :system :amun}
+           :mentak)
+        {:fi3 {:type :fi, :owner :norr, :location :b3, :offset [129 -8]},
+         :fi4 {:type :fi, :owner :mentak, :location :b3, :offset [-181 2]},
+         :fi5 {:type :fi, :owner :mentak, :location :b3, :offset [-41 -158]},
+         :de1 {:type :de, :owner :mentak, :location :b3, :offset [-21 142]},
+         :cr1 {:type :cr, :owner :mentak, :location :b3, :offset [99 -138]},
+         :cr2 {:type :cr, :owner :mentak, :location :b3, :offset [99 122]}})))
+

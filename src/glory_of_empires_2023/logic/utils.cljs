@@ -6,13 +6,9 @@
   (let [combine (fn [value1] (map #(vector value1 %) range2))]
     (mapcat combine range1)))
 
-(defn min-pos
-  #_{:test (fn [] (test/is (= [7 -4] (min-pos [[7 12] [8 -4]]))))}
-  [vectors] (apply mapv min vectors))
+(defn min-pos [vectors] (apply mapv min vectors))
 
-(defn max-pos
-  #_{:test (fn [] (test/is (= [8 12] (max-pos [[7 12] [8 -4]]))))}
-  [vectors] (apply mapv max vectors))
+(defn max-pos [vectors] (apply mapv max vectors))
 
 (defn pos> [[x1 y1] [x2 y2]] (and (> x1 x2) (> y1 y2)))
 (defn pos< [[x1 y1] [x2 y2]] (and (< x1 x2) (< y1 y2)))
@@ -34,3 +30,6 @@
 (defn vals-with-id [m]
   (->> m
     (map (fn [[id attr]] (assoc attr :id id)))))
+
+(defn attr= [attr value]
+  (fn [item] (= (get item attr) value)))

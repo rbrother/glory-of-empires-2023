@@ -1,5 +1,9 @@
 (ns glory-of-empires-2023.logic.ships
-  (:require [medley.core :refer [index-by]]))
+  (:require [medley.core :refer [index-by]]
+            [glory-of-empires-2023.logic.utils
+             :refer [mul-vec add-vec sub-vec distance attr=]]
+            [glory-of-empires-2023.logic.tiles :as tiles]
+            [glory-of-empires-2023.logic.tile-ship-locs :refer [space-locations]]))
 
 (def all-unit-types-arr
   [{:id :fi :type :ship :name "Fighter" :individual-ids false
@@ -68,14 +72,30 @@
     (str (name ship-type))
     (keyword)))
 
-(defn create-ships [existing-units prod-counts tile owner]
-  (let [prod-array (->> prod-counts
+(defn choose-new-ship-offset [type space-locs units-in-the-tile]
+  (->> space-locs
+    (map (fn [loc]
+           (let [loc-offset (sub-vec loc tiles/tile-center)]
+             {:loc loc-offset,
+              :min-dist (->> units-in-the-tile
+                          (map (fn [{unit-offset :offset}]
+                                 (distance (sub-vec unit-offset loc-offset))))
+                          (apply min))})))
+    (sort-by :min-dist)
+    (last)
+    (:loc)))
+
+(defn create-ships [existing-units prod-counts {tile-id :id, system :system :as tile} owner]
+  (let [space-locs (space-locations (get tiles/all-systems system))
+        prod-array (->> prod-counts
                      (mapcat (fn [[type count]] (repeat count type)))) ;; [:fi :fi :dr]
         create-ship (fn [existing-units type]
-                      (let [id (free-id existing-units type)]
+                      (let [id (free-id existing-units type)
+                            units-in-the-tile (->> existing-units (vals)
+                                                (filter (attr= :location tile-id)))]
                         (assoc existing-units
                           id {:type type
                               :owner owner
-                              :location tile
-                              :offset [0 0]})))]
+                              :location tile-id
+                              :offset (choose-new-ship-offset type space-locs units-in-the-tile)})))]
     (reduce create-ship existing-units prod-array)))
