@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx
                                    reg-sub inject-cofx]]
+            [medley.core :refer [dissoc-in]]
             [glory-of-empires-2023.debug :as debug]
             [glory-of-empires-2023.subs :as subs]
             [glory-of-empires-2023.view.components :refer [image-dir] :as comp]))
@@ -26,3 +27,9 @@
        [:div.bold "Hitpoints"] [:div "x / x"]]
       [comp/menu-item "Inflict Hit" [::add-hit-ship ship-id]]
       [comp/menu-item "Delete" [::delete-ship ship-id]]]]))
+
+;; events
+
+(reg-event-db ::delete-ship [debug/log-event]
+  (fn [db [_ id]]
+    (dissoc-in db [:units id])))

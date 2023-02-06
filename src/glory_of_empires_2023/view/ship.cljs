@@ -14,7 +14,7 @@
 (defn unit [{unit-name :name, :keys [id image-name image-size color offset] :as unit}]
   (.log js/console unit)
   (let [this-selected? @(subscribe [::selected-unit? id])
-         add-flag? (> (apply + image-size) 100)
+        add-flag? (> (apply + image-size) 100)
         [x y] (-> (mul-vec tiles/tile-size 0.5)
                 (sub-vec (mul-vec image-size 0.5))
                 (add-vec offset))]
@@ -32,7 +32,7 @@
                                     (dispatch [::drag-unit id]))
                   :on-drag-end #(dispatch [::drag-unit-end id])}]]
      [:div.unit-id (str/upper-case (name id))
-      (when unit-name (str " \"" unit-name "\"") )
+      (when unit-name (str " \"" unit-name "\""))
       ]]))
 
 (defn view [units]
