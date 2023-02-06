@@ -1,6 +1,7 @@
 (ns glory-of-empires-2023.subs
   (:require
     [re-frame.core :refer [reg-sub]]
+    [medley.core :refer [map-vals]]
     [glory-of-empires-2023.logic.ships :as ships]
     [glory-of-empires-2023.logic.races :as races]
     [glory-of-empires-2023.logic.tiles :as tiles]
@@ -21,11 +22,16 @@
                :color (:unit-color race-info)
                :owner-name (:name race-info)))))
 
-(reg-sub ::units-by-location :<- [::units]
+(reg-sub ::amended-units :<- [::units]
+  (fn [units _] (map-vals amend-unit units)))
+
+(reg-sub ::amended-unit :<- [::amended-units]
+  (fn [units [_ id]] (get units id)))
+
+(reg-sub ::units-by-location :<- [::amended-units]
   (fn [units _]
     (->> units
       (utils/vals-with-id)
-      (map amend-unit)
       (group-by :location))))
 
 (defn amend-tile [{:keys [id logical-pos system] :as tile} all-units]

@@ -9,11 +9,10 @@
     [glory-of-empires-2023.logic.tile-ship-locs :refer [space-locations ship-location-size]]
     [glory-of-empires-2023.view.ship :as ship]))
 
-
 (defn view [{id :id :as tile}]
-  (let [dragging-ship @(subscribe [::ship/drag-unit])
+  (let [dragging-ship? @(subscribe [::ship/drag-unit])
         current-drag-loc @(subscribe [::drag-target id])]
-    [:div.absolute {:style {:visibility (if dragging-ship :visible :hidden)}}
+    [:div.absolute {:style {:visibility (if dragging-ship? :visible :hidden)}}
      (for [[x y] (space-locations tile)
            :let [loc-center [(+ x (* 0.5 ship-location-size))
                              (+ y (* 0.5 ship-location-size))]

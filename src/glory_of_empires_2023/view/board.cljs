@@ -92,8 +92,9 @@
   [debug/log-event, (inject-cofx ::inject/sub [::closest-tile-to-cursor])]
   (fn [{{earlier-tile :selected-tile :keys [board-mouse-pos] :as db} :db,
         closest ::closest-tile-to-cursor} _]
-    {:db (assoc db
-           :selected-tile (if (not= earlier-tile (:id closest))
-                            (:id closest)
-                            nil)
-           :tile-click-pos (sub-vec board-mouse-pos (:screen-pos closest)))}))
+    {:db (-> db
+           (assoc :selected-tile (if (not= earlier-tile (:id closest))
+                                   (:id closest)
+                                   nil)
+             :tile-click-pos (sub-vec board-mouse-pos (:screen-pos closest)))
+           (dissoc :selected-unit))}))

@@ -8,7 +8,7 @@
     [glory-of-empires-2023.view.components :as components]))
 
 (defn system-info-box [{:keys [id image]}]
-  [:div.system-info-box {:on-click #(dispatch [::click-system id])}
+  [:div.system-info-box {:on-click (components/handler-no-propagate [::click-system id])}
    [:div [:img {:src (str components/image-dir "Tiles/" image)
                 :style {:height (* 0.5 tiles/tile-height)
                         :width (* 0.5 tiles/tile-width)}}]]
