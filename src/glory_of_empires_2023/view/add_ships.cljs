@@ -83,41 +83,62 @@
    [:div.ship-type-grid-item.bold "Produce"]
    [:div]])
 
+(defn race-selector []
+  (let [current-player @(subscribe [::player])
+        players (vals @(subscribe [::subs/players-amended]))]
+    [:select {:value (name current-player)
+              :on-change #(dispatch [::change-player (-> % .-target .-value)])}
+     (for [{id :id, player-name :name} players]
+       ^{:key id} [:option {:value (name id)} player-name])]))
+
 (defn view []
   (let [selected-tile @(subscribe [::subs/selected-tile])
-        owner @(subscribe [::subs/selected-tile-owner])
-        ship-types (filter #(= (:type %) :ship) ships/all-unit-types-arr)]
-    [components/dialog {:title [:span (str/capitalize (name owner))
-                                ": Add New Ships to system "
+        ship-types (filter #(= (:type %) :ship) ships/all-unit-types-arr)
+        player @(subscribe [::player])]
+    [components/dialog {:title [:span "Add New Ships to system "
                                 (str/upper-case (name selected-tile))]}
+     [:div.margin "Race" [race-selector]]
      [:div.ship-types-grid
       [headers1]
       [headers2]
       (for [ship-type ship-types]
         ^{:key (:id ship-type)}
-        [ship-info-row ship-type owner])]
-     [components/ok-cancel [::ok owner] [::cancel]]]))
+        [ship-info-row ship-type player])]
+     [components/ok-cancel [::ok] [::cancel]]]))
 
 ;; subs
 
-(reg-sub ::prod-counts (fn [db _] (:prod-counts db)))
+(reg-sub ::add-ships (fn [db _] (:add-ships db))) ;; State of the dialog
+
+(reg-sub ::prod-counts :<- [::add-ships]
+  (fn [add-ships _] (:prod-counts add-ships)))
 
 (reg-sub ::prod-count :<- [::prod-counts]
   (fn [prod-counts [_ ship-type]] (get prod-counts ship-type)))
 
+(reg-sub ::player :<- [::add-ships]
+  (fn [add-ships _] (:player add-ships)))
+
 ;; events
 
+(reg-event-db ::change-player
+  (fn [db [_ player]]
+    (assoc-in db [:add-ships :player] (keyword player))))
+
 (reg-event-db ::inc-prod-count [debug/log-event]
-  (fn [db [_ ship-type]] (update-in db [:prod-counts ship-type] inc)))
+  (fn [db [_ ship-type]]
+    (update-in db [:add-ships :prod-counts ship-type] inc)))
 
 (reg-event-db ::dec-prod-count [debug/log-event]
-  (fn [db [_ ship-type]] (update-in db [:prod-counts ship-type] dec-count)))
+  (fn [db [_ ship-type]]
+    (update-in db [:add-ships :prod-counts ship-type] dec-count)))
 
 (reg-event-db ::ok [debug/log-event]
-  (fn [{:keys [prod-counts selected-tile board] :as db} [_ owner]]
+  (fn [{{:keys [prod-counts player]} :add-ships,
+        :keys [selected-tile board] :as db} _]
     (-> db
-      (update :units #(ships/create-ships % prod-counts (get board selected-tile) owner))
-      (dissoc :dialog :prod-counts :selected-tile))))
+      (update :units #(ships/create-ships % prod-counts (get board selected-tile) player))
+      (dissoc :dialog :add-ships :selected-tile))))
 
 (reg-event-db ::cancel [debug/log-event]
-  (fn [db _] (dissoc db :dialog :prod-counts :selected-tile)))
+  (fn [db _] (dissoc db :dialog :add-ships :selected-tile)))

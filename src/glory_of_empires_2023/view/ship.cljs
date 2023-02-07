@@ -12,9 +12,7 @@
 ;; views
 
 (defn unit [{unit-name :name, :keys [id image-name image-size color offset] :as unit}]
-  (.log js/console unit)
   (let [this-selected? @(subscribe [::selected-unit? id])
-        add-flag? (> (apply + image-size) 100)
         [x y] (-> (mul-vec tiles/tile-size 0.5)
                 (sub-vec (mul-vec image-size 0.5))
                 (add-vec offset))]

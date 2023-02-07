@@ -27,6 +27,7 @@
   [:.relative {:position "relative"}]
   [:.absolute {:position "absolute"}]
   [:.pad {:padding "8px"}]
+  [:.margin {:margin "8px"}]
   [:.bold {:font-weight "bold"}]
   [:div.flex {:display "flex" :align-items "center"}]
   [:div.dialog-screen {:width "100%", :height "100vh", :z-index 100
@@ -70,7 +71,7 @@
   [:div.ship-types-grid {:display "grid",
                          :grid-template-columns "auto auto 230px auto auto auto
                          auto auto auto auto auto 1fr"
-                         :justify-items "stretch"}]
+                         :justify-items "stretch" :align-items "stretch"}]
   [:div.ship-type-grid-item {:border "2px solid #666", :padding "8px"}]
   [:div.system-info-box:hover {:background "#333333"}])
 

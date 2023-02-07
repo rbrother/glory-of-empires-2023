@@ -75,3 +75,14 @@
   (fn [selected-tile [_ tile-id]] (= tile-id selected-tile))) ;; eg. :a3
 
 (reg-sub ::dialog (fn [db _] (:dialog db)))
+
+(reg-sub ::players (fn [db _] (:players db)))
+
+(reg-sub ::players-amended :<- [::players]
+  (fn [players _]
+    (->> players
+      (map (fn [[id player]]
+             [id (-> player
+                   (assoc :id id)
+                   (merge (get races/all-races id)))]))
+      (into {}))))
