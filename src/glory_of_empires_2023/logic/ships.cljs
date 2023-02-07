@@ -72,30 +72,44 @@
     (str (name ship-type))
     (keyword)))
 
-(defn choose-new-ship-offset [type space-locs units-in-the-tile]
-  (->> space-locs
-    (map (fn [loc]
-           (let [loc-offset (sub-vec loc tiles/tile-center)]
-             {:loc loc-offset,
-              :min-dist (->> units-in-the-tile
-                          (map (fn [{unit-offset :offset}]
-                                 (distance (sub-vec unit-offset loc-offset))))
-                          (apply min))})))
-    (sort-by :min-dist)
-    (last)
-    (:loc)))
+(defn choose-new-ship-offset [ship-type space-locs units-in-the-tile]
+  (let [unit-size (-> all-unit-types (ship-type) (:image-size) (first))
+        placement-value
+        (fn [loc-offset]
+          (->> units-in-the-tile
+            (map (fn [{other-offset :offset, other-type :type}]
+                   (let [dist (distance (sub-vec other-offset loc-offset))
+                         same-type (= ship-type other-type)]
+                     (+ (when (< dist unit-size) (/ 20000 (inc dist))) ;; avoid overlap
+                       (if same-type dist (- dist)))))) ;; try to keep same together ;; separate ones keep away
+            (apply +)))]
+    (->> space-locs
+      (map (fn [loc]
+             (let [loc-offset (sub-vec loc tiles/tile-center)]
+               {:loc loc-offset,
+                :placement-value (placement-value loc-offset)})))
+      (sort-by :placement-value)
+      (first)
+      (:loc))))
 
-(defn create-ships [existing-units prod-counts {tile-id :id, system :system :as tile} owner]
+(defn arrange-ships-to-tile [existing-units {tile-id :id, system :system :as tile} new-ships]
   (let [space-locs (space-locations (get tiles/all-systems system))
-        prod-array (->> prod-counts
-                     (mapcat (fn [[type count]] (repeat count type)))) ;; [:fi :fi :dr]
-        create-ship (fn [existing-units type]
-                      (let [id (free-id existing-units type)
-                            units-in-the-tile (->> existing-units (vals)
-                                                (filter (attr= :location tile-id)))]
-                        (assoc existing-units
-                          id {:type type
-                              :owner owner
-                              :location tile-id
-                              :offset (choose-new-ship-offset type space-locs units-in-the-tile)})))]
-    (reduce create-ship existing-units prod-array)))
+        arrange-ship
+        (fn [units {ship-type :type :as ship}]
+          (let [ship-id (or (:id ship) (free-id units ship-type))
+                units-in-the-tile (->> units (vals)
+                                    (filter (attr= :location tile-id)))]
+            (assoc units
+              ship-id (assoc ship
+                        :id ship-id
+                        :offset (choose-new-ship-offset ship-type space-locs units-in-the-tile)))))]
+    (reduce arrange-ship existing-units new-ships)))
+
+(defn create-ships [existing-units prod-counts {tile-id :id, :as tile} owner]
+  (let [new-ships (->> prod-counts
+                    (mapcat (fn [[type count]] (repeat count type))) ;; [:fi :fi :dr]
+                    (map (fn [type] {:type type
+                                     :owner owner
+                                     :location tile-id})))]
+    (arrange-ships-to-tile existing-units tile new-ships)))
+
