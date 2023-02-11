@@ -11,6 +11,14 @@
 
 ;; views
 
+(defn damage [{:keys [hits-taken]}]
+  [:<>
+   (when (> hits-taken 0)
+     (for [hit (range 0 hits-taken)]
+       ^{:key hit} [:img {:src (str image-dir "Misc/Unit-Damage.gif")
+                          :style {:z-index 1, :position "absolute"
+                                  :left 0, :top (- 50 (* 50 hit)), :width "80px", :height "70px"}}]))])
+
 (defn unit [{unit-name :name, :keys [id image-name image-size color offset] :as unit}]
   (let [this-selected? @(subscribe [::selected-unit? id])
         [x y] (-> (mul-vec tiles/tile-size 0.5)
@@ -28,7 +36,8 @@
                   :on-drag-start #(do
                                     (set! (-> % .-dataTransfer .-effectAllowed) "move")
                                     (dispatch [::drag-unit id]))
-                  :on-drag-end #(dispatch [::drag-unit-end id])}]]
+                  :on-drag-end #(dispatch [::drag-unit-end id])}]
+      [damage unit]]
      [:div.unit-id (str/upper-case (name id))
       (when unit-name (str " \"" unit-name "\""))
       ]]))

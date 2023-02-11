@@ -108,8 +108,10 @@
 (defn create-ships [existing-units prod-counts {tile-id :id, :as tile} owner]
   (let [new-ships (->> prod-counts
                     (mapcat (fn [[type count]] (repeat count type))) ;; [:fi :fi :dr]
-                    (map (fn [type] {:type type
-                                     :owner owner
-                                     :location tile-id})))]
+                    (map (fn [type]
+                           {:type type
+                            :owner owner
+                            :location tile-id
+                            :hits-taken 0})))]
     (arrange-ships-to-tile existing-units tile new-ships)))
 

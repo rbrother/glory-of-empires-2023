@@ -12,15 +12,18 @@
 (reg-sub ::units (fn [db _] (:units db)))
 
 (defn amend-unit [{:keys [type owner] :as unit}]
-  (let [{:keys [image-name image-size] :as type-info} (get ships/all-unit-types type)
+  (let [type-info (get ships/all-unit-types type)
         race-info (get races/all-races owner)]
-    (-> unit (assoc
-               :category (:type type-info) ;; :ship / :ground
-               :type-name (:name type-info)
-               :image-name image-name
-               :image-size image-size
-               :color (:unit-color race-info)
-               :owner-name (:name race-info)))))
+    (-> unit
+      (merge (select-keys type-info
+               [:image-name, :image-size, :speed
+                :fire-count 1, :fire-percent 20]))
+      (assoc
+        :category (:type type-info) ;; :ship / :ground
+        :type-name (:name type-info)
+        :max-hit-points (:hit-points type-info)
+        :color (:unit-color race-info)
+        :owner-name (:name race-info)))))
 
 (reg-sub ::amended-units :<- [::units]
   (fn [units _] (map-vals amend-unit units)))
