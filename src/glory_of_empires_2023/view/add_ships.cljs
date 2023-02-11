@@ -83,21 +83,12 @@
    [:div.ship-type-grid-item.bold "Produce"]
    [:div]])
 
-(defn race-selector []
-  (let [current-player @(subscribe [::player])
-        players (vals @(subscribe [::subs/players-amended]))]
-    [:select {:value (name current-player)
-              :on-change #(dispatch [::change-player (-> % .-target .-value)])}
-     (for [{id :id, player-name :name} players]
-       ^{:key id} [:option {:value (name id)} player-name])]))
-
 (defn view []
   (let [selected-tile @(subscribe [::subs/selected-tile])
         ship-types (filter #(= (:type %) :ship) ships/all-unit-types-arr)
-        player @(subscribe [::player])]
+        player @(subscribe [::subs/current-player])]
     [components/dialog {:title [:span "Add New Ships to system "
                                 (str/upper-case (name selected-tile))]}
-     [:div.margin "Race" [race-selector]]
      [:div.ship-types-grid
       [headers1]
       [headers2]
@@ -116,14 +107,7 @@
 (reg-sub ::prod-count :<- [::prod-counts]
   (fn [prod-counts [_ ship-type]] (get prod-counts ship-type)))
 
-(reg-sub ::player :<- [::add-ships]
-  (fn [add-ships _] (:player add-ships)))
-
 ;; events
-
-(reg-event-db ::change-player
-  (fn [db [_ player]]
-    (assoc-in db [:add-ships :player] (keyword player))))
 
 (reg-event-db ::inc-prod-count [debug/log-event]
   (fn [db [_ ship-type]]
@@ -134,10 +118,10 @@
     (update-in db [:add-ships :prod-counts ship-type] dec-count)))
 
 (reg-event-db ::ok [debug/log-event]
-  (fn [{{:keys [prod-counts player]} :add-ships,
-        :keys [selected-tile board] :as db} _]
+  (fn [{{:keys [prod-counts]} :add-ships,
+        :keys [selected-tile board current-player] :as db} _]
     (-> db
-      (update :units #(ships/create-ships % prod-counts (get board selected-tile) player))
+      (update :units #(ships/create-ships % prod-counts (get board selected-tile) current-player))
       (dissoc :dialog :add-ships :selected-tile))))
 
 (reg-event-db ::cancel [debug/log-event]

@@ -86,3 +86,6 @@
                    (assoc :id id)
                    (merge (get races/all-races id)))]))
       (into {}))))
+
+(reg-sub ::current-player
+  (fn [db _] (:current-player db)))

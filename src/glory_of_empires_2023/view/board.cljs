@@ -55,17 +55,15 @@
 
 (defn view []
   (let [board-data @(subscribe [::subs/board-amended])]
-    [:<>
-     [:h1 "Glory of Empires"]
-     [:div.board {:id "board"
-                  :on-mouse-move #(dispatch [::board-mouse-move (event-board-pos %)])
-                  ;; mouse-move event are not generated during drag operation,
-                  ;; but drag-over are generated in similar way. We need that to
-                  ;; keep our custom hover-detection updated
-                  :on-drag-over #(dispatch [::board-mouse-move (event-board-pos %)])
-                  :on-click #(dispatch [::board-click])}
-      (for [tile-data board-data]
-        ^{:key (:id tile-data)} [tile tile-data])]]))
+    [:div.board {:id "board"
+                 :on-mouse-move #(dispatch [::board-mouse-move (event-board-pos %)])
+                 ;; mouse-move event are not generated during drag operation,
+                 ;; but drag-over are generated in similar way. We need that to
+                 ;; keep our custom hover-detection updated
+                 :on-drag-over #(dispatch [::board-mouse-move (event-board-pos %)])
+                 :on-click #(dispatch [::board-click])}
+     (for [tile-data board-data]
+       ^{:key (:id tile-data)} [tile tile-data])]))
 
 ;; subs
 
