@@ -5,6 +5,7 @@
     [re-frame.db]
     [reagent-dev-tools.core :as dev-tools]
     [glory-of-empires-2023.styles] ;; Needed for global styles
+    [glory-of-empires-2023.cognito :as cognito]
     [glory-of-empires-2023.events :as events]
     [glory-of-empires-2023.view.main :as views]
     [glory-of-empires-2023.config :as config]))
@@ -24,4 +25,5 @@
 (defn init []
   (re-frame/dispatch-sync [::events/initialize-db])
   (mount-root)
-  (dev-setup))
+  (dev-setup)
+  (re-frame/dispatch [::cognito/login]))
