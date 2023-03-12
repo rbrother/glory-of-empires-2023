@@ -2,6 +2,7 @@
   (:require
     [re-frame.core :refer [subscribe dispatch reg-event-db]]
     [glory-of-empires-2023.view.board :as board]
+    [glory-of-empires-2023.view.login :as login]
     [glory-of-empires-2023.view.choose-system :as choose-system]
     [glory-of-empires-2023.view.add-ships :as add-ships]
     [glory-of-empires-2023.subs :as subs]))
@@ -20,11 +21,17 @@
     :add-ships [add-ships/view]
     nil))
 
-(defn main-panel []
+(defn game-panel []
   [:div
    [dialog]
    [:div "Current Player" [race-selector]]
    [board/view]])
+
+(defn main-panel []
+  (let [logged-in? @(subscribe [::subs/login])]
+    (if logged-in?
+      [game-panel]
+      [login/view])))
 
 ;; events
 

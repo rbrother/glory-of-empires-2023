@@ -7,6 +7,8 @@
     [glory-of-empires-2023.logic.tiles :as tiles]
     [glory-of-empires-2023.logic.utils :as utils :refer [add-vec]]))
 
+(reg-sub ::login (fn [db _] (:login db)))
+
 (reg-sub ::board (fn [db _] (:board db)))
 
 (reg-sub ::units (fn [db _] (:units db)))
