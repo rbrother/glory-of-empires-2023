@@ -2,6 +2,9 @@
   (:require
     [re-frame.core :refer [reg-event-db]]
     [clojure.string :as str]
+    ["jwt-decode" :as jwt-decode]
+    [medley.core :refer [map-keys]]
+    [camel-snake-kebab.core :as csk]
     [glory-of-empires-2023.debug :as debug :refer [log]]))
 
 ;; Example hosted UI URL:
@@ -22,6 +25,10 @@
    :response-type "token"
    :scope "email+openid+phone"
    })
+
+(defn decode-token [token-str]
+  (map-keys csk/->kebab-case
+    (js->clj (jwt-decode token-str) :keywordize-keys true)))
 
 ;; Returns map the param-names as keys and param valus
 (defn url-params [search-string param-definitions]
@@ -54,13 +61,19 @@
     (log login-url)
     (-> js/window (.-location) (.replace login-url))))
 
-(defn get-credentials-for-code [db tokens]
+(defn get-credentials-for-code [db {:keys [id-token access-token] :as tokens}]
   (let [credentials (new (-> js/AWS (.-CognitoIdentityCredentials))
                       #js {"IdentityPoolId" (:identity-pool-id config)})]
     (log credentials)
     (set! (-> js/AWS (.-config) (.-region)) (:region config))
     (set! (-> js/AWS (.-config) (.-credentials)) credentials)
-    (assoc db :login tokens)))
+    ;; How to set the token to credentials?
+
+    (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL
+    (assoc db :login
+      (assoc tokens
+        :id (decode-token id-token)
+        :access (decode-token access-token)))))
 
 ;; events
 

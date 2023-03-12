@@ -26,7 +26,8 @@
                  [rm-hull/infix "0.3.3"]
                  [day8.re-frame/http-fx "0.2.4"]
                  [cljs-ajax "0.8.4"]
-                 [re-frame-utils "0.1.0"]]
+                 [re-frame-utils "0.1.0"]
+                 [camel-snake-kebab "0.4.3"]]
   
   :source-paths ["src"]
 

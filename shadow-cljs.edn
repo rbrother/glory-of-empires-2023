@@ -11,7 +11,8 @@
   [metosin/reagent-dev-tools "1.0.0"]
   [re-frame-utils "0.1.0"]
   [hashp "0.2.2"]
-  [binaryage/devtools "1.0.6"]]
+  [binaryage/devtools "1.0.6"]
+  [camel-snake-kebab "0.4.3"]]
 
  :dev-http
  {8280 "resources/public"
