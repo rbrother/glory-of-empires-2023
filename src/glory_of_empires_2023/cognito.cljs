@@ -1,6 +1,6 @@
 (ns glory-of-empires-2023.cognito
   (:require
-    [re-frame.core :refer [reg-event-db]]
+    [re-frame.core :refer [reg-event-db dispatch]]
     [clojure.string :as str]
     ["jwt-decode" :as jwt-decode]
     [medley.core :refer [map-keys]]
@@ -34,7 +34,7 @@
 (defn url-params [search-string param-definitions]
   (let [url-pars (new js/URLSearchParams search-string)]
     (->> param-definitions
-      (map (fn [{:keys [key par]}] [key (.get url-pars par)] ))
+      (map (fn [{:keys [key par]}] [key (.get url-pars par)]))
       (into {}))))
 
 ;; http://localhost:8280/#id_token=eyJraWQiOiJvZzZEdUdKTjNLUkgybk5UcTk2ZEtHK1h6NUFlTUhDYVR1WEN6enNBK3k4PSIsImFsZyI6IlJTMjU2In0.eyJhdF9oYXNoIjoidEVZblFGbzBqX1ZibTQ5OEdfdnJzQSIsInN1YiI6IjQ0MzkxMjNjLWNkMzctNGZkNy1hMmRkLWNlOTQxODUwYjMwYyIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtbm9ydGgtMS5hbWF6b25hd3MuY29tXC9ldS1ub3J0aC0xX1l0ZzZKa095OCIsImNvZ25pdG86dXNlcm5hbWUiOiI0NDM5MTIzYy1jZDM3LTRmZDctYTJkZC1jZTk0MTg1MGIzMGMiLCJhdWQiOiI0bnMzZjM2MG9iazZlOG5lOGU0dDdjOWZkZSIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNjc4NjA0NjA0LCJleHAiOjE2Nzg2MDgyMDQsImlhdCI6MTY3ODYwNDYwNCwianRpIjoiZWRhNzFhOWQtNTA1YS00YmM5LWE3YzQtYzNmNTYyN2NkNDhiIiwiZW1haWwiOiJyb2JlcnRAaWtpLmZpIn0.AwaZDLrEoiY72evb5bFZpE9sp3h16kUpWMpW3v96KRrwOqxjMtq2dBmFcvTAYipaB_Sox76bx4WsC9SvFoVlEDEoKNVSann-OSEZeLSOKYADccVqiZDoUY6XT3YpnJsBIc98upywh4G2o_0iD_FbePQkWBcctg8iSR-9uoMm7wuzxaY5nijkOKh3s9ZE4P_GnvBwWjMUkbKePo-v6Z0ZJ_WPmoySZdT3EhDhpONZlQ8CqhUXU4pdkvP8mIqgG6pXYe6r1QZz-BHIINl19h4HCl_S--97CBcZLqL6JVtWNA6K7Kdko4zDjT0k_0_-yGwQHKxoLtRrH8w01sk3ppZ0sQ
@@ -60,20 +60,12 @@
                     "redirect_uri=" (js/encodeURIComponent redirect-url))]
     (log login-url)
     (-> js/window (.-location) (.replace login-url))))
-
 (defn get-credentials-for-code [db {:keys [id-token access-token] :as tokens}]
-  (let [credentials (new (-> js/AWS (.-CognitoIdentityCredentials))
-                      #js {"IdentityPoolId" (:identity-pool-id config)})]
-    (log credentials)
-    (set! (-> js/AWS (.-config) (.-region)) (:region config))
-    (set! (-> js/AWS (.-config) (.-credentials)) credentials)
-    ;; How to set the token to credentials?
-
+  (let [id-decoded (decode-token id-token)
+        access-decoded (decode-token access-token)]
     (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL
     (assoc db :login
-      (assoc tokens
-        :id (decode-token id-token)
-        :access (decode-token access-token)))))
+      (assoc tokens :id id-decoded, :access access-decoded))))
 
 ;; events
 

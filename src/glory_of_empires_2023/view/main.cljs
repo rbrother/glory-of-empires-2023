@@ -1,6 +1,8 @@
 (ns glory-of-empires-2023.view.main
   (:require
+    [glory-of-empires-2023.debug :as debug :refer [log]]
     [re-frame.core :refer [subscribe dispatch reg-event-db]]
+    [glory-of-empires-2023.cognito :as cognito]
     [glory-of-empires-2023.view.board :as board]
     [glory-of-empires-2023.view.login :as login]
     [glory-of-empires-2023.view.choose-system :as choose-system]
@@ -25,6 +27,7 @@
   [:div
    [dialog]
    [:div "Current Player" [race-selector]]
+   [:div [:button {:on-click #(dispatch [::fetch-game]) } "GET GAME"]]
    [board/view]])
 
 (defn main-panel []
@@ -38,3 +41,18 @@
 (reg-event-db ::change-player
   (fn [db [_ player]]
     (assoc db :current-player (keyword player))))
+
+(reg-event-db ::fetch-game [debug/log-event]
+  (fn [db _]
+    (let [username (get-in db [:login :id :cognito:username])
+          identity-id (str (:region cognito/config) ":" username)]
+      (js/DynamoDBGetItem identity-id (fn [error data] (dispatch [::item-received error data])))
+      db)))
+
+(reg-event-db ::item-received [debug/log-event]
+  (fn [db [_ error data]]
+    (log ::item-received)
+    (log error)
+    (log data)
+    db
+    ))
