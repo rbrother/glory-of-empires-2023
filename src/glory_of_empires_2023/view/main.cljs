@@ -44,14 +44,11 @@
 
 (reg-event-db ::fetch-game [debug/log-event]
   (fn [db _]
-    (js/DynamoDBGetItem
-      (fn [error data] (dispatch [::item-received error data])))
+    (js/DynamoDBGetGame "38462387647832647"
+      (fn [game] (dispatch [::game-received (js->clj game :keywordize-keys true)])))
     db))
 
-(reg-event-db ::item-received [debug/log-event]
-  (fn [db [_ error data]]
-    (log ::item-received)
-    (log error)
-    (log data)
-    db
-    ))
+(reg-event-db ::game-received [debug/log-event]
+  (fn [db [_ game]]
+    (log ::game-received)
+    (assoc db :game game)))
