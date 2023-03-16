@@ -44,10 +44,9 @@
 
 (reg-event-db ::fetch-game [debug/log-event]
   (fn [db _]
-    (let [username (get-in db [:login :id :cognito:username])
-          identity-id (str (:region cognito/config) ":" username)]
-      (js/DynamoDBGetItem identity-id (fn [error data] (dispatch [::item-received error data])))
-      db)))
+    (js/DynamoDBGetItem
+      (fn [error data] (dispatch [::item-received error data])))
+    db))
 
 (reg-event-db ::item-received [debug/log-event]
   (fn [db [_ error data]]

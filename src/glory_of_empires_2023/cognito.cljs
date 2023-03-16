@@ -18,12 +18,18 @@
 (def config
   {:region "eu-north-1"
    :account-id "886559219659"
+   :user-pool-id "eu-north-1_Ytg6JkOy8"
    :app-client-id "4ns3f360obk6e8ne8e4t7c9fde"
    :identity-pool-id "eu-north-1:434228c0-d69b-4dd3-93be-65105e8ef28b"
    ;; "code" for code grant flow and "token" for implicit flow:
    ;; https://aws.amazon.com/blogs/mobile/understanding-amazon-cognito-user-pool-oauth-2-0-grants/
    :response-type "token"
    :scope "email+openid+phone"
+   ;; The role has arn:aws:iam::886559219659:role/cognito_glory_of_empires_user_role
+   ;; Maximum session 1 hour
+   ;; Has associated policy oneClick_Cognito_gloryofempiresidentitypoolAuth_Role_1677965103678
+   ;; This initially allows all amazon-cognito operations (add DynamoDB later)
+   :authenticated-role "cognito_glory_of_empires_user_role"
    })
 
 (defn decode-token [token-str]
@@ -51,7 +57,7 @@
         [_ params-str] (str/split url #"#")]
     (url-params params-str login-pars)))
 
-(defn redirect-to-cognito-login []
+(defn redirect-to-cognito-login [db]
   (let [redirect-url (-> js/window (.-location) (.-origin))
         login-url (str "https://glory-of-empires.auth.eu-north-1.amazoncognito.com/login?"
                     "client_id=" (:app-client-id config) "&"
@@ -59,19 +65,49 @@
                     "scope=" (:scope config) "&"
                     "redirect_uri=" (js/encodeURIComponent redirect-url))]
     (log login-url)
-    (-> js/window (.-location) (.replace login-url))))
-(defn get-credentials-for-code [db {:keys [id-token access-token] :as tokens}]
+    (-> js/window (.-location) (.replace login-url))
+    db))
+
+(defn identity-id-received [data]
+  (log "identity-id-received")
+  (log data))
+
+(defn fetch-identity-with-tokens [db {:keys [id-token access-token] :as tokens}]
   (let [id-decoded (decode-token id-token)
         access-decoded (decode-token access-token)]
-    (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL
+
     (assoc db :login
       (assoc tokens :id id-decoded, :access access-decoded))))
 
+(defn store-tokens [db {:keys [id-token access-token] :as tokens}]
+  (let [id-decoded (decode-token id-token)
+        access-decoded (decode-token access-token)]
+    (assoc db :login
+      (assoc tokens :id id-decoded, :access access-decoded))))
 ;; events
 
 (reg-event-db ::login [debug/log-event]
   (fn [db _]
     (let [tokens (token-params)]
+      (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL after reading it
       (if (:id-token tokens)
-        (get-credentials-for-code db tokens)
-        (redirect-to-cognito-login)))))
+        (do
+          (js/CognitoIdentityGetId (:id-token tokens)
+            #(dispatch [::identity-id-received %]))
+          (store-tokens db tokens))
+        (redirect-to-cognito-login db)))))
+
+(reg-event-db ::identity-id-received [debug/log-event]
+  (fn [db [_ raw-data]]
+    (let [data (js->clj raw-data :keywordize-keys true)
+          identity-id (:IdentityId data)
+          id-token (get-in db [:login :id-token])]
+      (log ::identity-id-received)
+      (js/CognitoGetCredentialsForIdentity identity-id id-token
+        #(dispatch [::credentials-received %]))
+      (assoc-in db [:login :identity-id] identity-id))))
+
+(reg-event-db ::credentials-received [debug/log-event]
+  (fn [db [_ raw-data]]
+    (let [data (js->clj raw-data :keywordize-keys true)]
+      (assoc-in db [:login :credentials] (:Credentials data)))))

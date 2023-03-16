@@ -23,6 +23,7 @@
                 :asset-path "/js/compiled"
                 :modules {:app {:init-fn glory-of-empires-2023.core/init}}
                 :devtools {:preloads [hashp.core]}
+                :compiler-options { :output-feature-set :es2018 }
                 :dev {:compiler-options
                       {:closure-defines
                        {}}}}
