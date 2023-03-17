@@ -1,4 +1,4 @@
-(ns glory-of-empires-2023.cognito
+(ns glory-of-empires-2023.aws.cognito
   (:require
     [re-frame.core :refer [reg-event-db dispatch]]
     [clojure.string :as str]
@@ -16,9 +16,7 @@
 ;; Redirecting back to eg:  http://localhost:8280/?code=dc7dfe5b-b1e2-4eea-a85c-514e13da722c
 
 (def config
-  {:region "eu-north-1"
-   :account-id "886559219659"
-   :user-pool-id "eu-north-1_Ytg6JkOy8"
+  {:user-pool-id "eu-north-1_Ytg6JkOy8"
    :app-client-id "4ns3f360obk6e8ne8e4t7c9fde"
    :identity-pool-id "eu-north-1:434228c0-d69b-4dd3-93be-65105e8ef28b"
    ;; "code" for code grant flow and "token" for implicit flow:
@@ -110,4 +108,5 @@
 (reg-event-db ::credentials-received [debug/log-event]
   (fn [db [_ raw-data]]
     (let [data (js->clj raw-data :keywordize-keys true)]
-      (assoc-in db [:login :credentials] (:Credentials data)))))
+      (assoc-in db [:login :credentials]
+        (map-keys csk/->kebab-case (:Credentials data))))))

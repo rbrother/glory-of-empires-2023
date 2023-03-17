@@ -2,7 +2,7 @@
   (:require
     [glory-of-empires-2023.debug :as debug :refer [log]]
     [re-frame.core :refer [subscribe dispatch reg-event-db]]
-    [glory-of-empires-2023.cognito :as cognito]
+    [glory-of-empires-2023.aws.dynamo-db :as dynamo-db]
     [glory-of-empires-2023.view.board :as board]
     [glory-of-empires-2023.view.login :as login]
     [glory-of-empires-2023.view.choose-system :as choose-system]
@@ -44,9 +44,10 @@
 
 (reg-event-db ::fetch-game [debug/log-event]
   (fn [db _]
-    (js/DynamoDBGetGame "38462387647832647"
-      (fn [game] (dispatch [::game-received (js->clj game :keywordize-keys true)])))
-    db))
+    (let [game-id "38462387647832647"]
+      (dynamo-db/get-game db game-id
+        (fn [game] (dispatch [::game-received game])))
+      (assoc db :fetching game-id))))
 
 (reg-event-db ::game-received [debug/log-event]
   (fn [db [_ game]]

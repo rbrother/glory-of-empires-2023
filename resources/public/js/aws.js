@@ -49,23 +49,3 @@ function CognitoGetCredentialsForIdentity(identity_id, id_token, callback) {
       }
     })
 }
-
-function DynamoDBGetGame(game_id, callback_fn) {
-    console.log("DynamoDBGetItem")
-    console.log(awsCredentials)
-    const dynamoService = new AWS.DynamoDB(
-        {region: region,
-        credentials: awsCredentials})
-    dynamoService.getItem(
-        {TableName: "glory-of-empires",
-        Key: {id: {"S": game_id}}},
-         function(err, data) {
-            if (err) {
-                 console.log(err, err.stack); // an error occurred
-            } else {
-                const json = AWS.DynamoDB.Converter.unmarshall(data.Item)
-                callback_fn(json);           // successful response)
-            }
-        }
-    )
-}
