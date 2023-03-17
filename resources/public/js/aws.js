@@ -4,8 +4,6 @@ var userPoolId = "eu-north-1_Ytg6JkOy8"
 var identityPoolId = "eu-north-1:434228c0-d69b-4dd3-93be-65105e8ef28b"
 var issuer_key = "cognito-idp." + region + ".amazonaws.com/" + userPoolId
 
-var awsCredentials = null
-
 function CognitoIdentityGetId(id_token, callback) {
     // Calling GetID as instructed at https://docs.aws.amazon.com/cognito/latest/developerguide/authentication-flow.html
     console.log("CognitoIdentityGetId: ", issuer_key)
@@ -15,7 +13,7 @@ function CognitoIdentityGetId(id_token, callback) {
       // name-value pairs that map provider names to provider tokens
       Logins: {
         // Have to use [key] "computed key" syntax from ES2015 below, since in JavaScript
-        // would interprete issuer_key: id_token as literal "issuer_key": id_token
+        // would interpret issuer_key: id_token as literal "issuer_key": id_token
         [issuer_key]: id_token
       }
     }
@@ -34,7 +32,7 @@ function CognitoGetCredentialsForIdentity(identity_id, id_token, callback) {
       // We should not need the Logins-map, since we don't use eternal providers
       Logins: {
         // Have to use [key] "computed key" syntax from ES2015 below, since in JavaScript
-        // would interprete issuer_key: id_token as literal "issuer_key": id_token
+        // would interpret issuer_key: id_token as literal "issuer_key": id_token
         [issuer_key]: id_token
       }
     }
@@ -43,8 +41,6 @@ function CognitoGetCredentialsForIdentity(identity_id, id_token, callback) {
       if (err) {
         console.log(err, err.stack)
       } else {
-        const c =  data.Credentials
-        awsCredentials = new AWS.Credentials(c.AccessKeyId, c.SecretKey, c.SessionToken)
         callback(data)
       }
     })
