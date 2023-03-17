@@ -6,14 +6,18 @@
     #js {"region" (:region aws/config)
          "credentials" (aws/credentials-object db)}))
 
-(defn get-game [db game-id callback-fn]
-  (-> (dynamo-db db)
+(defn get-item [app-db table-name key data-callback]
+  (-> (dynamo-db app-db)
     (.getItem (clj->js
-                {"TableName" "glory-of-empires"
-                 "Key" {"id" {"S" game-id}}})
+                {"TableName" table-name
+                 "Key" key})
       (aws/result-handler
         (fn [^js/Object data]
           (let [item (.-Item data)
                 ;; Convert {"N": "767} -> 767
                 unmarshalled (-> js/AWS (.-DynamoDB) (.-Converter) (.unmarshall item))]
-            (callback-fn (js->clj unmarshalled :keywordize-keys true))))))))
+            (data-callback
+              (js->clj unmarshalled :keywordize-keys true)))))))
+  )
+(defn get-game [app-db game-id callback-fn]
+  (get-item app-db "glory-of-empires" {"id" {"S" game-id}} callback-fn))
