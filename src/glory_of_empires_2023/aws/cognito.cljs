@@ -70,13 +70,6 @@
   (log "identity-id-received")
   (log data))
 
-(defn fetch-identity-with-tokens [db {:keys [id-token access-token] :as tokens}]
-  (let [id-decoded (decode-token id-token)
-        access-decoded (decode-token access-token)]
-
-    (assoc db :login
-      (assoc tokens :id id-decoded, :access access-decoded))))
-
 (defn store-tokens [db {:keys [id-token access-token] :as tokens}]
   (let [id-decoded (decode-token id-token)
         access-decoded (decode-token access-token)]
