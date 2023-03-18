@@ -1,10 +1,11 @@
 (ns glory-of-empires-2023.aws.dynamo-db
-  (:require [glory-of-empires-2023.aws.core :as aws]))
+  (:require [glory-of-empires-2023.aws.core :as aws]
+            [glory-of-empires-2023.aws.cognito :as cognito]))
 
 (defn- dynamo-db [db]
   (new (.-DynamoDB js/AWS)
     #js {"region" (:region aws/config)
-         "credentials" (aws/credentials-object-from-token db)}))
+         "credentials" (cognito/credentials-object-from-token db)}))
 
 (defn get-item [app-db table-name key data-callback]
   (-> (dynamo-db app-db)

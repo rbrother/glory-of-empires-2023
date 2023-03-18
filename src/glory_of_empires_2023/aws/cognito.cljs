@@ -5,6 +5,7 @@
     ["jwt-decode" :as jwt-decode]
     [medley.core :refer [map-keys]]
     [camel-snake-kebab.core :as csk]
+    [glory-of-empires-2023.aws.core :as aws]
     [glory-of-empires-2023.debug :as debug :refer [log]]))
 
 ;; Example hosted UI URL:
@@ -16,19 +17,20 @@
 ;; Redirecting back to eg:  http://localhost:8280/?code=dc7dfe5b-b1e2-4eea-a85c-514e13da722c
 
 (def config
-  {:user-pool-id "eu-north-1_Ytg6JkOy8"
-   :app-client-id "4ns3f360obk6e8ne8e4t7c9fde"
-   :identity-pool-id "eu-north-1:434228c0-d69b-4dd3-93be-65105e8ef28b"
-   ;; "code" for code grant flow and "token" for implicit flow:
-   ;; https://aws.amazon.com/blogs/mobile/understanding-amazon-cognito-user-pool-oauth-2-0-grants/
-   :response-type "token"
-   :scope "email+openid+phone"
-   ;; The role has arn:aws:iam::886559219659:role/cognito_glory_of_empires_user_role
-   ;; Maximum session 1 hour
-   ;; Has associated policy oneClick_Cognito_gloryofempiresidentitypoolAuth_Role_1677965103678
-   ;; This initially allows all amazon-cognito operations (add DynamoDB later)
-   :authenticated-role "cognito_glory_of_empires_user_role"
-   })
+  (merge aws/config
+    {:user-pool-id "eu-north-1_Ytg6JkOy8"
+     :app-client-id "4ns3f360obk6e8ne8e4t7c9fde"
+     :identity-pool-id "eu-north-1:434228c0-d69b-4dd3-93be-65105e8ef28b"
+     ;; "code" for code grant flow and "token" for implicit flow:
+     ;; https://aws.amazon.com/blogs/mobile/understanding-amazon-cognito-user-pool-oauth-2-0-grants/
+     :response-type "token"
+     :scope "email+openid+phone"
+     ;; The role has arn:aws:iam::886559219659:role/cognito_glory_of_empires_user_role
+     ;; Maximum session 1 hour
+     ;; Has associated policy oneClick_Cognito_gloryofempiresidentitypoolAuth_Role_1677965103678
+     ;; This initially allows all amazon-cognito operations (add DynamoDB later)
+     :authenticated-role "cognito_glory_of_empires_user_role"
+     }))
 
 (defn decode-token [token-str]
   (map-keys csk/->kebab-case
@@ -71,6 +73,14 @@
         access-decoded (decode-token access-token)]
     (assoc db :login
       (assoc tokens :id id-decoded, :access access-decoded))))
+
+(defn credentials-object-from-token [{{:keys [id-token]} :login :as _db}]
+  (let [issuer-key (str "cognito-idp." (:region config) ".amazonaws.com/" (:user-pool-id config))]
+    (new (.-CognitoIdentityCredentials js/AWS)
+      (clj->js {:IdentityPoolId (:identity-pool-id config)
+                :Logins {issuer-key id-token}})
+      #js {:region (:region config)})))
+
 ;; events
 
 (reg-event-db ::login [debug/log-event]
