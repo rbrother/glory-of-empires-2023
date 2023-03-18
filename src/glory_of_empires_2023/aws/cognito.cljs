@@ -66,10 +66,6 @@
     (-> js/window (.-location) (.replace login-url))
     db))
 
-(defn identity-id-received [data]
-  (log "identity-id-received")
-  (log data))
-
 (defn store-tokens [db {:keys [id-token access-token] :as tokens}]
   (let [id-decoded (decode-token id-token)
         access-decoded (decode-token access-token)]
@@ -82,24 +78,5 @@
     (let [tokens (token-params)]
       (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL after reading it
       (if (:id-token tokens)
-        (do
-          (js/CognitoIdentityGetId (:id-token tokens)
-            #(dispatch [::identity-id-received %]))
-          (store-tokens db tokens))
+        (store-tokens db tokens)
         (redirect-to-cognito-login db)))))
-
-(reg-event-db ::identity-id-received [debug/log-event]
-  (fn [db [_ raw-data]]
-    (let [data (js->clj raw-data :keywordize-keys true)
-          identity-id (:IdentityId data)
-          id-token (get-in db [:login :id-token])]
-      (log ::identity-id-received)
-      (js/CognitoGetCredentialsForIdentity identity-id id-token
-        #(dispatch [::credentials-received %]))
-      (assoc-in db [:login :identity-id] identity-id))))
-
-(reg-event-db ::credentials-received [debug/log-event]
-  (fn [db [_ raw-data]]
-    (let [data (js->clj raw-data :keywordize-keys true)]
-      (assoc-in db [:login :credentials]
-        (map-keys csk/->kebab-case (:Credentials data))))))

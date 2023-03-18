@@ -4,7 +4,7 @@
 (defn- dynamo-db [db]
   (new (.-DynamoDB js/AWS)
     #js {"region" (:region aws/config)
-         "credentials" (aws/credentials-object db)}))
+         "credentials" (aws/credentials-object-from-token db)}))
 
 (defn get-item [app-db table-name key data-callback]
   (-> (dynamo-db app-db)
