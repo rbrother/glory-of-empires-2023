@@ -68,18 +68,19 @@
     (-> js/window (.-location) (.replace login-url))
     db))
 
-(defn store-tokens [db {:keys [id-token access-token] :as tokens}]
-  (let [id-decoded (decode-token id-token)
-        access-decoded (decode-token access-token)]
-    (assoc db :login
-      (assoc tokens :id id-decoded, :access access-decoded))))
-
-(defn credentials-object-from-token [{{:keys [id-token]} :login :as _db}]
+(defn credentials-object-from-token [id-token]
   (let [issuer-key (str "cognito-idp." (:region config) ".amazonaws.com/" (:user-pool-id config))]
     (new (.-CognitoIdentityCredentials js/AWS)
       (clj->js {:IdentityPoolId (:identity-pool-id config)
                 :Logins {issuer-key id-token}})
       #js {:region (:region config)})))
+
+(defn store-tokens [db {:keys [id-token access-token] :as tokens}]
+  (let [id-decoded (decode-token id-token)
+        access-decoded (decode-token access-token)]
+    (assoc db :login
+      (assoc tokens :id id-decoded, :access access-decoded
+        :credentials-object (credentials-object-from-token id-token)))))
 
 ;; events
 
