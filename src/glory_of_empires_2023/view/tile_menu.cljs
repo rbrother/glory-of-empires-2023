@@ -23,19 +23,19 @@
 
 ;; events
 
-(reg-event-db ::choose-system [debug/log-event]
+(reg-event-db ::choose-system [debug/log-event debug/validate-malli]
   (fn [db _]
     (assoc db :dialog :choose-system)))
 
-(reg-event-db ::add-ships [debug/log-event]
+(reg-event-db ::add-ships [debug/log-event debug/validate-malli]
   (fn [db [_ player]]
     (assoc db :dialog :add-ships
       :add-ships {:player player})))
 
-(reg-event-db ::arrange-ships [debug/log-event]
-  (fn [{:keys [selected-tile board] :as db} _]
+(reg-event-db ::arrange-ships [debug/log-event debug/validate-malli]
+  (fn [{{:keys [board]} :game, :keys [selected-tile] :as db} _]
     (-> db
-      (update :units
+      (update-in [:game :units]
         (fn [units]
           (let [ships (->> units (vals) (filter (attr= :location selected-tile)))
                 units-without-ships (->> units (remove-vals (attr= :location selected-tile)))]

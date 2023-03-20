@@ -115,3 +115,4 @@
                             :hits-taken 0})))]
     (arrange-ships-to-tile existing-units tile new-ships)))
 
+(defn inflict-hit [unit] (update unit :hits-taken inc))

@@ -68,18 +68,18 @@
 
 ;; events
 
-(reg-event-db ::change-system-type-filter [debug/log-event]
+(reg-event-db ::change-system-type-filter [debug/log-event debug/validate-malli]
   (fn [db [_ value]]
     (assoc-in db [:choose-system :type-filter]
       (if (= value "all") nil
         (keyword value)))))
 
-(reg-event-db ::change-system-text-filter [debug/log-event]
+(reg-event-db ::change-system-text-filter [debug/log-event debug/validate-malli]
   (fn [db [_ value]]
     (assoc-in db [:choose-system :text-filter] value)))
 
-(reg-event-db ::click-system [debug/log-event]
+(reg-event-db ::click-system [debug/log-event debug/validate-malli]
   (fn [{tile :selected-tile :as db} [_ system-id]]
     (-> db
-      (assoc-in [:board tile :system] system-id)
+      (assoc-in [:game :board tile :system] system-id)
       (dissoc :dialog, :choose-system, :selected-tile))))

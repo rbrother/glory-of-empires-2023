@@ -39,16 +39,16 @@
 
 ;; events
 
-(reg-event-db ::drag-enter
+(reg-event-db ::drag-enter [debug/validate-malli]
   (fn [db [_ tile-id loc-center]]
     (assoc db :drag-target
       {:tile-id tile-id, :loc-center loc-center})))
 
-(reg-event-db ::drop-on-tile [debug/log-event]
+(reg-event-db ::drop-on-tile [debug/log-event debug/validate-malli]
   (fn [{:keys [drag-unit] :as db}
        [_ {tile-id :id} drop-pos]]
     (cond-> db
-      drag-unit (update-in [:units drag-unit]
+      drag-unit (update-in [:game :units drag-unit]
                   #(assoc %
                      :location tile-id
                      :offset drop-pos))

@@ -62,18 +62,18 @@
 
 ;; event
 
-(reg-event-db ::drag-unit [debug/log-event]
+(reg-event-db ::drag-unit [debug/log-event debug/validate-malli]
   (fn [db [_ id]]
     (-> db
       (assoc :drag-unit id)
       (dissoc :selected-unit
         :selected-tile))))
 
-(reg-event-db ::drag-unit-end [debug/log-event]
+(reg-event-db ::drag-unit-end [debug/log-event debug/validate-malli]
   (fn [db [_ id]]
     (dissoc db :drag-unit)))
 
-(reg-event-db ::click-unit [debug/log-event]
+(reg-event-db ::click-unit [debug/log-event debug/validate-malli]
   (fn [{:keys [selected-unit] :as db} [_ id]]
     (if (= selected-unit id)
       (dissoc db :selected-unit)

@@ -9,9 +9,11 @@
 
 (reg-sub ::login (fn [db _] (:login db)))
 
-(reg-sub ::board (fn [db _] (:board db)))
+(reg-sub ::game (fn [db _] (:game db)))
 
-(reg-sub ::units (fn [db _] (:units db)))
+(reg-sub ::board :<- [::game] (fn [{:keys [board]} _] board))
+
+(reg-sub ::units :<- [::game] (fn [{:keys [units]} _] units))
 
 (defn amend-unit [{:keys [type owner] :as unit}]
   (let [type-info (get ships/all-unit-types type)
@@ -81,7 +83,7 @@
 
 (reg-sub ::dialog (fn [db _] (:dialog db)))
 
-(reg-sub ::players (fn [db _] (:players db)))
+(reg-sub ::players :<- [::game] (fn [{:keys [players]} _] players))
 
 (reg-sub ::players-amended :<- [::players]
   (fn [players _]
@@ -92,5 +94,5 @@
                    (merge (get races/all-races id)))]))
       (into {}))))
 
-(reg-sub ::current-player
-  (fn [db _] (:current-player db)))
+(reg-sub ::current-player :<- [::game]
+  (fn [game _] (:current-player game)))

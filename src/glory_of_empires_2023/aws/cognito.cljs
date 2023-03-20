@@ -84,7 +84,7 @@
 
 ;; events
 
-(reg-event-db ::login [debug/log-event]
+(reg-event-db ::login [debug/log-event debug/validate-malli]
   (fn [db _]
     (let [tokens (token-params)]
       (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL after reading it

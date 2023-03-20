@@ -3,6 +3,7 @@
             [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx
                                    reg-sub inject-cofx]]
             [medley.core :refer [dissoc-in]]
+            [glory-of-empires-2023.logic.ships :as ships]
             [glory-of-empires-2023.debug :as debug]
             [glory-of-empires-2023.subs :as subs]
             [glory-of-empires-2023.view.components :refer [image-dir] :as comp]))
@@ -37,16 +38,24 @@
         [comp/menu-item "Repair" [::repair-ship ship-id]])
       [comp/menu-item "Destroy" [::delete-ship ship-id]]]]))
 
+;; helpers
+
+(defn unit-db-path [unit-id] [:game :units unit-id])
+
+(defn update-unit [db id fn] (update-in db (unit-db-path id) fn))
+
+
+
 ;; events
 
-(reg-event-db ::delete-ship [debug/log-event]
+(reg-event-db ::delete-ship [debug/log-event debug/validate-malli]
   (fn [db [_ id]]
-    (dissoc-in db [:units id])))
+    (dissoc-in db (unit-db-path id))))
 
-(reg-event-db ::add-hit-ship [debug/log-event]
+(reg-event-db ::add-hit-ship [debug/log-event debug/validate-malli]
   (fn [db [_ id]]
-    (update-in db [:units id :hits-taken] inc)))
+    (update-unit db id ships/inflict-hit)))
 
-(reg-event-db ::repair-ship [debug/log-event]
+(reg-event-db ::repair-ship [debug/log-event debug/validate-malli]
   (fn [db [_ id]]
-    (assoc-in db [:units id :hits-taken] 0)))
+    (update-unit db id #(assoc % :hits-taken 0))))

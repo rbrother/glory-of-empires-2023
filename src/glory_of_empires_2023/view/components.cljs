@@ -30,7 +30,7 @@
 
 ;; events
 
-(reg-event-db ::click-background [debug/log-event]
+(reg-event-db ::click-background [debug/log-event debug/validate-malli]
   (fn [db [_ target]]
     ;; Background receives click through bubbling even when the dialog
     ;; itself is clicked. We close the dialog only if the target is

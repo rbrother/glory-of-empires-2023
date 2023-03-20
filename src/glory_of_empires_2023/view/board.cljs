@@ -87,7 +87,7 @@
 (reg-event-fx ::board-click
   ;; re-frame gives for some reason warning on using sub even when we do it
   ;; in the recommended inject-cofx way. Seems to work ok though.
-  [debug/log-event, (inject-cofx ::inject/sub [::closest-tile-to-cursor])]
+  [debug/log-event, debug/validate-malli, (inject-cofx ::inject/sub [::closest-tile-to-cursor])]
   (fn [{{earlier-tile :selected-tile :keys [board-mouse-pos] :as db} :db,
         closest ::closest-tile-to-cursor} _]
     {:db (-> db

@@ -109,20 +109,22 @@
 
 ;; events
 
-(reg-event-db ::inc-prod-count [debug/log-event]
+(reg-event-db ::inc-prod-count [debug/log-event debug/validate-malli]
   (fn [db [_ ship-type]]
     (update-in db [:add-ships :prod-counts ship-type] inc)))
 
-(reg-event-db ::dec-prod-count [debug/log-event]
+(reg-event-db ::dec-prod-count [debug/log-event debug/validate-malli]
   (fn [db [_ ship-type]]
     (update-in db [:add-ships :prod-counts ship-type] dec-count)))
 
-(reg-event-db ::ok [debug/log-event]
-  (fn [{{:keys [prod-counts]} :add-ships,
-        :keys [selected-tile board current-player] :as db} _]
+(reg-event-db ::ok [debug/log-event debug/validate-malli]
+  (fn [{:keys [selected-tile]
+        {:keys [prod-counts]} :add-ships
+        {:keys [board current-player]} :game
+        :as db} _]
     (-> db
-      (update :units #(ships/create-ships % prod-counts (get board selected-tile) current-player))
+      (update-in [:game :units] #(ships/create-ships % prod-counts (get board selected-tile) current-player))
       (dissoc :dialog :add-ships :selected-tile))))
 
-(reg-event-db ::cancel [debug/log-event]
+(reg-event-db ::cancel [debug/log-event debug/validate-malli]
   (fn [db _] (dissoc db :dialog :add-ships :selected-tile)))

@@ -1,11 +1,23 @@
 (ns glory-of-empires-2023.debug
   (:require [re-frame.core :as rf]
-            [clojure.data :refer [diff]]))
+            [cljs-time.core :as cljs-time]
+            [clojure.data :refer [diff]]
+            [glory-of-empires-2023.logic.malli :as malli]
+            [malli.core :as m]
+            [malli.util :as mu]))
 
 (defn log [item] (.log js/console item))
 
 (defn log-color [item color]
   (.log js/console (str "%c" item) (str "color: " color)))
+
+(defn with-timing [title fn]
+  (let [now (cljs-time/now)
+        result (fn)
+        end (cljs-time/now)
+        dur (cljs-time/interval now end)]
+    (log (str title " duration " (cljs-time/in-millis dur) " ms"))
+    result))
 
 (def log-event
   (rf/->interceptor
@@ -20,3 +32,20 @@
                (when only-in-after (log {:added only-in-after})))
              context ;; Logging is side effect: return the context unaltered
              )))
+
+(def compiled-appdb-malli (m/explainer malli/app-db))
+
+(def validate-malli
+  (rf/->interceptor
+    :id :validate
+    :before identity
+    :after (fn [{:keys [coeffects effects] :as context}]
+             (let [orig-db (get coeffects :db)
+                   after-db (get effects :db)
+                   error (first (:errors (compiled-appdb-malli after-db)))]
+               (if error
+                 (do
+                   (log-color (str "[VALIDATION FAILURE] " (first (:event coeffects))
+                                "\n" error) "red")
+                   (assoc-in context [:effects :db] orig-db)) ;; ignore changes if errors
+                 context)))))
