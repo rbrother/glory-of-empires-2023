@@ -17,6 +17,7 @@
 (def game
   [:map {:closed true}
    [:id :string]
+   [:version number?] ;; Integer, increment on changes
    [:players [:map]]
    [:board [:map]]
    [:units [:map-of :keyword unit]]

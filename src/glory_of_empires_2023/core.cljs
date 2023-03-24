@@ -1,12 +1,12 @@
 (ns glory-of-empires-2023.core
   (:require
+    [glory-of-empires-2023.debug :as debug]
     [reagent.dom :as rdom]
-    [re-frame.core :as re-frame]
+    [re-frame.core :as re-frame :refer [reg-event-db]]
     [re-frame.db]
     [reagent-dev-tools.core :as dev-tools]
     [glory-of-empires-2023.styles] ;; Needed for global styles
     [glory-of-empires-2023.aws.cognito :as cognito]
-    [glory-of-empires-2023.events :as events]
     [glory-of-empires-2023.view.main :as views]
     [glory-of-empires-2023.config :as config]))
 
@@ -23,7 +23,10 @@
     (rdom/render [views/main-panel] root-el)))
 
 (defn init []
-  (re-frame/dispatch-sync [::events/initialize-db])
+  (re-frame/dispatch-sync [::initialize-db])
   (mount-root)
   (dev-setup)
   (re-frame/dispatch [::cognito/login]))
+
+(reg-event-db ::initialize-db [debug/log-event debug/validate-malli]
+  (fn [_ _] {}))
