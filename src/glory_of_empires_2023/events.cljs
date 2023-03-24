@@ -6,7 +6,8 @@
 
 (reg-event-db ::initialize-db [debug/log-event debug/validate-malli]
   (fn [_ _]
-    {:game {:board (board/round-board 3)
+    {:game {:id "Battle of Titans"
+            :board (board/round-board 3)
             :players {:mentak {}
                       :yssaril {}}
             :current-player :mentak

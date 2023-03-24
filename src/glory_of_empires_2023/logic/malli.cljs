@@ -16,6 +16,7 @@
 
 (def game
   [:map {:closed true}
+   [:id :string]
    [:players [:map]]
    [:board [:map]]
    [:units [:map-of :keyword unit]]
