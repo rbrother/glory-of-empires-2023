@@ -28,9 +28,7 @@
   [:div
    [dialog]
    [:div "Current Player" [race-selector]]
-   [:div
-    [:button {:on-click #(dispatch [::game-sync/fetch-game]) } "GET GAME"]
-    [:button {:on-click #(dispatch [::game-sync/save-game]) } "SAVE GAME"]]
+   [:div [:button {:on-click #(dispatch [::game-sync/fetch-game]) } "GET GAME"]]
    [board/view]])
 
 (defn main-panel []

@@ -1,6 +1,6 @@
 (ns glory-of-empires-2023.aws.cognito
   (:require
-    [re-frame.core :refer [reg-event-db dispatch]]
+    [re-frame.core :refer [reg-event-fx dispatch]]
     [clojure.string :as str]
     ["jwt-decode" :as jwt-decode]
     [medley.core :refer [map-keys]]
@@ -84,10 +84,12 @@
 
 ;; events
 
-(reg-event-db ::login [debug/log-event debug/validate-malli]
-  (fn [db _]
+(reg-event-fx ::login [debug/log-event debug/validate-malli]
+  (fn [{db :db} _]
     (let [tokens (token-params)]
       (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL after reading it
       (if (:id-token tokens)
-        (store-tokens db tokens)
+        {:db (store-tokens db tokens)
+         :dispatch-later {:ms 5000 :dispatch [:glory-of-empires-2023.game-sync/sync-game]} }
         (redirect-to-cognito-login db)))))
+

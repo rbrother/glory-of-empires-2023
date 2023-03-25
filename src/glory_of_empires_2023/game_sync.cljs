@@ -2,12 +2,7 @@
   (:require
     [glory-of-empires-2023.debug :as debug :refer [log]]
     [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx]]
-    [glory-of-empires-2023.aws.dynamo-db :as dynamo-db]
-    [glory-of-empires-2023.view.board :as board]
-    [glory-of-empires-2023.view.login :as login]
-    [glory-of-empires-2023.view.choose-system :as choose-system]
-    [glory-of-empires-2023.view.add-ships :as add-ships]
-    [glory-of-empires-2023.subs :as subs]))
+    [glory-of-empires-2023.aws.dynamo-db :as dynamo-db]))
 
 (def game-id "Battle of Titans") ;; TODO: Allow multiple games
 
@@ -23,22 +18,26 @@
     (log ::game-received)
     (log game)
     (-> db
-      (assoc :game game)
+      (assoc :game game
+        :game-db game)
       (dissoc :fetching))))
 
-(reg-event-db ::save-game [debug/log-event debug/validate-malli]
-  (fn [{:keys [game] :as db} _]
-    (dynamo-db/save-game db game #(dispatch [::game-saved %]))
-    (assoc db :fetching game-id)))
-
-(reg-event-db ::game-saved [debug/log-event debug/validate-malli]
-  (fn [db [_ result]]
-    (log ::game-saved)
+(reg-event-fx ::game-saved [debug/log-event debug/validate-malli]
+  (fn [{db :db} [_ saved-game result]]
+    (log "game-saved")
     (log result)
-    (dissoc db :fetching)))
+    (log saved-game)
+    {:db (-> db (dissoc :fetching)
+           (assoc :game-db saved-game))
+     :dispatch-later {:ms 5000 :dispatch [::sync-game]}}))
 
-(reg-event-fx ::sync-game
-  (fn [{db :db} _]
-
-    {:db db}
-    ))
+(reg-event-fx ::sync-game [debug/log-event debug/validate-malli]
+  (fn [{{:keys [game game-db] :as db} :db} _]
+    (if (= game game-db)
+      {:db db
+       :dispatch-later {:ms 5000 :dispatch [::sync-game]}}
+      (let [new-game (update game :version inc)]
+        (dynamo-db/save-game db new-game #(dispatch [::game-saved new-game %]))
+        {:db (assoc db
+               :fetching game-id
+               :game new-game)}))))

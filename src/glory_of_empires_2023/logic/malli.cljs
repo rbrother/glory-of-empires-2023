@@ -26,6 +26,7 @@
 (def app-db
   [:map {:closed true}
    [:game {:optional true} game]
+   [:game-db {:optional true} game]
    [:login {:optional true} [:map]]
    [:fetching {:optional true} :any]
    [:board-mouse-pos {:optional true} vector2]
