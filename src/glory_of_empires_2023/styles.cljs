@@ -30,6 +30,9 @@
   [:.margin {:margin "8px"}]
   [:.bold {:font-weight "bold"}]
   [:div.flex {:display "flex" :align-items "center"}]
+  [:div.error {:display "grid" :grid-template-columns "1fr auto"
+               :background "#f33" :color "black" :font-weight "bold"
+               :padding "8px" :align-items "center"}]
   [:div.dialog-screen {:width "100%", :height "100vh", :z-index 100
                        :background-color "rgba(0,0,0,.5)"
                        :position "fixed"}]

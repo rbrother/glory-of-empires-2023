@@ -23,8 +23,16 @@
    [:units [:map-of :keyword unit]]
    [:current-player :keyword]])
 
+(def aws-error
+  [:map {:closed true}
+   [:type :string]
+   [:message :string]
+   [:time :string]
+   [:operation :string]])
+
 (def app-db
   [:map {:closed true}
+   [:aws-error {:optional true} aws-error]
    [:game {:optional true} game]
    [:game-db {:optional true} game]
    [:login {:optional true} [:map]]

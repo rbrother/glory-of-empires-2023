@@ -11,7 +11,7 @@
 (defn- dynamo-db ^js/AWS.DynamoDB [db]
   (new (.-DynamoDB js/AWS)
     #js {"region" (:region aws/config)
-         "credentials" (get-in db [:login :credentials-object])}))
+         "credentials" (aws/credentials-object db)}))
 
 (def converter (-> js/AWS (.-DynamoDB) (.-Converter)))
 
@@ -29,7 +29,7 @@
     (.getItem (clj->js
                 {"TableName" table-name
                  "Key" key})
-      (aws/result-handler
+      (aws/result-handler "Get Item from Database"
         (fn [^js/Object data]
           (data-callback (unmarshall-from-ddb-item (.-Item data))))))))
 
@@ -38,7 +38,7 @@
                  {"TableName" table-name
                   "ReturnConsumedCapacity" "TOTAL"
                   "Item" (marshall-to-ddb-item item)})
-        handler (aws/result-handler
+        handler (aws/result-handler "Save Item to Database"
                   (fn [^js/Object data]
                     (result-callback (js->clj data :keywordize-keys true))))]
     ^js/Object (.putItem (dynamo-db app-db) params handler)))

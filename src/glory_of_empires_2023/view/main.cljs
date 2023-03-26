@@ -2,8 +2,10 @@
   (:require
     [glory-of-empires-2023.debug :as debug :refer [log]]
     [re-frame.core :refer [subscribe dispatch reg-event-db]]
+    [glory-of-empires-2023.aws.core :as aws]
     [glory-of-empires-2023.view.board :as board]
     [glory-of-empires-2023.view.login :as login]
+    [glory-of-empires-2023.view.error :as error]
     [glory-of-empires-2023.view.choose-system :as choose-system]
     [glory-of-empires-2023.view.add-ships :as add-ships]
     [glory-of-empires-2023.subs :as subs]
@@ -26,6 +28,7 @@
 
 (defn game-panel []
   [:div
+   [error/error-message]
    [dialog]
    [:div "Current Player" [race-selector]]
    [:div [:button {:on-click #(dispatch [::game-sync/fetch-game]) } "GET GAME"]]
