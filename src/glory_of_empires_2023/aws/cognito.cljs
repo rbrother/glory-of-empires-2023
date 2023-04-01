@@ -90,6 +90,5 @@
       (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL after reading it
       (if (:id-token tokens)
         {:db (store-tokens db tokens)
-         :fx [[:dispatch-later {:ms aws/mins-30 :dispatch [::aws/renew-credentials]}]
-              [:dispatch-later {:ms 5000 :dispatch [:glory-of-empires-2023.game-sync/sync-game]}]]}
+         :dispatch-later {:ms aws/mins-30 :dispatch [::aws/renew-credentials]}}
         (redirect-to-cognito-login db)))))
