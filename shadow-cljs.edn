@@ -14,7 +14,8 @@
   [com.andrewmcveigh/cljs-time "0.5.2"]
   [hashp "0.2.2"]
   [binaryage/devtools "1.0.6"]
-  [camel-snake-kebab "0.4.3"]]
+  [camel-snake-kebab "0.4.3"]
+  [juji/editscript "0.6.3"]]
 
  :dev-http
  {8280 "resources/public"

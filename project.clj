@@ -27,7 +27,8 @@
                  [day8.re-frame/http-fx "0.2.4"]
                  [cljs-ajax "0.8.4"]
                  [re-frame-utils "0.1.0"]
-                 [camel-snake-kebab "0.4.3"]]
+                 [camel-snake-kebab "0.4.3"]
+                 [juji/editscript "0.6.3"]]
   
   :source-paths ["src"]
 
