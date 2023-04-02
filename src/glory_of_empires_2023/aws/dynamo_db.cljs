@@ -1,5 +1,6 @@
 (ns glory-of-empires-2023.aws.dynamo-db
   (:require
+    [medley.core :refer [assoc-some]]
     [glory-of-empires-2023.logic.json :as json]
     [glory-of-empires-2023.aws.core :as aws]
     [glory-of-empires-2023.debug :refer [log]]))
@@ -35,22 +36,27 @@
         (fn [^js/Object data]
           (data-callback (unmarshall-from-ddb-item (.-Item data))))))))
 
-(defn put-item [{:keys [app-db table-name item opts result-callback condition-failed-callback]}]
+(defn condition-failed? [err]
+  (= (.-code err) "ConditionalCheckFailedException"))
+
+(defn put-item [{:keys [app-db table-name item result-callback condition-failed-callback
+                        condition-expression expression-attribute-values]}]
   (let [params (clj->js
-                 (merge {"TableName" table-name
-                    "ReturnConsumedCapacity" "TOTAL"
-                    "Item" (marshall-to-ddb-item item)}
-                   opts))
+                 (assoc-some {}
+                   "TableName" table-name
+                   "ReturnConsumedCapacity" "TOTAL"
+                   "Item" (marshall-to-ddb-item item)
+                   "ConditionExpression" condition-expression
+                   "ExpressionAttributeValues" expression-attribute-values))
         handler (fn [err ^js/Object data]
-                  (if err
-                    (if (and (= (.-code err) "ConditionalCheckFailedException")
-                          condition-failed-callback)
-                      (condition-failed-callback)
-                      (aws/handle-error "Save Item to Database" err))
-                    (result-callback (js->clj data :keywordize-keys true))))]
+                  (cond
+                    (not err) (result-callback (js->clj data :keywordize-keys true))
+                    (condition-failed? err) (condition-failed-callback)
+                    :else (aws/handle-error "Save Item to Database" err)))]
     ^js/Object (.putItem (dynamo-db app-db) params handler)))
 
 (def game-table-name "glory-of-empires")
+
 (defn get-game [app-db game-id callback-fn]
   (get-item app-db game-table-name {"id" {"S" game-id}} {} callback-fn))
 
@@ -62,8 +68,8 @@
 (defn save-game [app-db game expected-db-version callback-fn remote-newer-callback]
   (put-item {:app-db app-db, :table-name "glory-of-empires"
              :item game, :result-callback callback-fn
-             :condition-failed-callback remote-newer-callback
              ;; Require that the version of the game before overwrite is same as we locally think
              ;; it is ie. other clients have not been pushing changes that we would overwrite
-             :opts {"ConditionExpression" "version = :version"
-                    "ExpressionAttributeValues" {":version" {"N" (str expected-db-version)}}}}))
+             :condition-expression "version = :version"
+             :expression-attribute-values {":version" {"N" (str expected-db-version)}}
+             :condition-failed-callback remote-newer-callback}))

@@ -17,8 +17,6 @@
 
 (reg-event-fx ::game-received [debug/log-event debug/validate-malli]
   (fn [{db :db} [_ game]]
-    (log ::game-received)
-    (log game)
     {:db (-> db
            (assoc :game game
              :game-db game)
