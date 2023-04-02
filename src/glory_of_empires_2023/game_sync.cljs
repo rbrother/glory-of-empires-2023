@@ -2,7 +2,7 @@
   (:require
     [editscript.core :as edit]
     [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx]]
-    [glory-of-empires-2023.debug :as debug :refer [log]]
+    [glory-of-empires-2023.debug :as debug :refer [log log-error]]
     [glory-of-empires-2023.aws.dynamo-db :as dynamo-db]))
 
 (def game-id "Battle of Titans") ;; TODO: Allow multiple games
@@ -42,7 +42,13 @@
 (reg-event-fx ::merge-remote [debug/log-event debug/validate-malli]
   (fn [{{:keys [game game-db] :as db} :db} [_ remote-game]]
     (let [local-diff (edit/diff game-db game)
-          merged (edit/patch remote-game local-diff)]
+          merged (try
+                   (edit/patch remote-game local-diff)
+                   (catch js/Error e
+                     (log-error e)
+                     ;; If application of local changes fails because
+                     ;; of merge conflict, ignore local changes
+                     remote-game))]
       (log (edit/get-edits local-diff))
       {:db (assoc db
              :game-db remote-game

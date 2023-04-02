@@ -8,6 +8,8 @@
 
 (defn log [item] (.log js/console item))
 
+(defn log-error [item] (.error js/console item))
+
 (defn log-color [item color]
   (.log js/console (str "%c" item) (str "color: " color)))
 
