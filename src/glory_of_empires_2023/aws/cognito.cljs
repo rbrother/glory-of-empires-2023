@@ -6,6 +6,7 @@
     [medley.core :refer [map-keys]]
     [camel-snake-kebab.core :as csk]
     [glory-of-empires-2023.aws.core :as aws]
+    [glory-of-empires-2023.game-sync :as game-sync]
     [glory-of-empires-2023.debug :as debug :refer [log]]))
 
 ;; Example hosted UI URL:
@@ -79,7 +80,9 @@
   (let [id-decoded (decode-token id-token)
         access-decoded (decode-token access-token)]
     (assoc db :login
-      (assoc tokens :id id-decoded, :access access-decoded
+      (assoc tokens
+        :id id-decoded
+        :access access-decoded
         :credentials-object (credentials-object-from-token id-token)))))
 
 ;; events
@@ -90,5 +93,6 @@
       (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL after reading it
       (if (:id-token tokens)
         {:db (store-tokens db tokens)
+         :dispatch [::game-sync/create-websocket]
          :dispatch-later {:ms aws/mins-30 :dispatch [::aws/renew-credentials]}}
         (redirect-to-cognito-login db)))))

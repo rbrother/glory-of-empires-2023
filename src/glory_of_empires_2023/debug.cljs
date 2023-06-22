@@ -1,10 +1,15 @@
 (ns glory-of-empires-2023.debug
   (:require [re-frame.core :as rf]
             [cljs-time.core :as cljs-time]
+            [medley.core :refer [assoc-some]]
             [clojure.data :refer [diff]]
             [glory-of-empires-2023.logic.malli :as malli]
             [malli.core :as m]
             [malli.util :as mu]))
+
+(defn current-time-str []
+  (let [t (js/Date.)]
+    (str (.getHours t) ":" (.getMinutes t) ":" (.getSeconds t))))
 
 (defn log [item] (.log js/console item))
 
@@ -29,7 +34,7 @@
              (let [orig-db (get coeffects :db)
                    after-db (get effects :db)
                    [only-in-orig only-in-after _] (diff orig-db after-db)]
-               (log-color (str "[EVENT] " (first (:event coeffects))) "blue")
+               (log-color (str "[EVENT " (current-time-str) "] " (first (:event coeffects))) "blue")
                (when only-in-orig (log {:removed only-in-orig}))
                (when only-in-after (log {:added only-in-after})))
              context ;; Logging is side effect: return the context unaltered

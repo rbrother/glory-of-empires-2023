@@ -15,32 +15,40 @@ exports.handler = async event => {
   } catch (e) {
     return { statusCode: 500, body: e.stack };
   }
+
+  const senderConnectionId = event.requestContext.connectionId
   
   const apigwManagementApi = new AWS.ApiGatewayManagementApi({
     apiVersion: '2018-11-29',
     endpoint: event.requestContext.domainName + '/' + event.requestContext.stage
   });
   
-  const postData = JSON.parse(event.body).data;
+  const inputData = JSON.parse(event.body)
+  // Here we could modify the message going to clients, now we pass on the message from one client to all as-is
+  const postData = JSON.stringify(inputData)
   
   const postCalls = connectionData.Items.map(async ({ connectionId }) => {
     try {
-      await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: postData }).promise();
+      if (connectionId != senderConnectionId) {
+          console.log("Sending client message: ", connectionId, postData)
+          await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: postData }).promise();
+      }
     } catch (e) {
       if (e.statusCode === 410) {
         console.log(`Found stale connection, deleting ${connectionId}`);
         await ddb.delete({ TableName: TABLE_NAME, Key: { connectionId } }).promise();
       } else {
-        throw e;
+        console.log(e)
+        throw e
       }
     }
-  });
+  })
   
   try {
     await Promise.all(postCalls);
   } catch (e) {
     return { statusCode: 500, body: e.stack };
   }
-
+  console.log("All Messages sent")
   return { statusCode: 200, body: 'Data sent.' };
 };
