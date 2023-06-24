@@ -1,8 +1,9 @@
 (ns glory-of-empires-2023.view.add-ships
   (:require
     [clojure.string :as str]
+    [glory-of-empires-2023.game-sync :as game-sync]
     [glory-of-empires-2023.logic.races :as races]
-    [re-frame.core :refer [subscribe dispatch reg-event-db reg-sub]]
+    [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx reg-sub]]
     [glory-of-empires-2023.debug :as debug]
     [glory-of-empires-2023.logic.ships :as ships]
     [glory-of-empires-2023.subs :as subs]
@@ -117,14 +118,16 @@
   (fn [db [_ ship-type]]
     (update-in db [:add-ships :prod-counts ship-type] dec-count)))
 
-(reg-event-db ::ok [debug/log-event debug/validate-malli]
-  (fn [{:keys [selected-tile]
-        {:keys [prod-counts]} :add-ships
-        {:keys [board current-player]} :game
-        :as db} _]
-    (-> db
-      (update-in [:game :units] #(ships/create-ships % prod-counts (get board selected-tile) current-player))
-      (dissoc :dialog :add-ships :selected-tile))))
+(reg-event-fx ::ok [debug/log-event debug/validate-malli]
+  (fn [{{:keys [selected-tile]
+         {:keys [prod-counts]} :add-ships
+         {:keys [board current-player]} :game} :db :as fx} _]
+    (-> fx
+      (game-sync/update-game
+        (fn [game]
+          (update game :units
+            #(ships/create-ships % prod-counts (get board selected-tile) current-player))))
+      (update :db #(dissoc % :dialog :add-ships :selected-tile)))))
 
 (reg-event-db ::cancel [debug/log-event debug/validate-malli]
   (fn [db _] (dissoc db :dialog :add-ships :selected-tile)))

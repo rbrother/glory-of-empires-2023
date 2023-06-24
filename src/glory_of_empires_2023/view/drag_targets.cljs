@@ -1,9 +1,10 @@
 (ns glory-of-empires-2023.view.drag-targets
   (:require
     [glory-of-empires-2023.debug :as debug]
+    [glory-of-empires-2023.game-sync :as game-sync]
     [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx
                            reg-sub inject-cofx]]
-    [medley.core :refer [assoc-some]]
+    [medley.core :refer [assoc-some dissoc-in]]
     [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance]]
     [glory-of-empires-2023.logic.tiles :refer [tile-center]]
     [glory-of-empires-2023.logic.tile-ship-locs :refer [space-locations ship-location-size]]
@@ -44,12 +45,12 @@
     (assoc db :drag-target
       {:tile-id tile-id, :loc-center loc-center})))
 
-(reg-event-db ::drop-on-tile [debug/log-event debug/validate-malli]
-  (fn [{:keys [drag-unit] :as db}
+(reg-event-fx ::drop-on-tile [debug/log-event debug/validate-malli]
+  (fn [{{:keys [drag-unit]} :db :as fx}
        [_ {tile-id :id} drop-pos]]
-    (cond-> db
-      drag-unit (update-in [:game :units drag-unit]
-                  #(assoc %
-                     :location tile-id
-                     :offset drop-pos))
-      true (dissoc :drag-target))))
+    (-> fx
+      (game-sync/update-game
+        (fn [game]
+          (update-in game [:units drag-unit]
+            #(assoc % :location tile-id, :offset drop-pos))))
+      (dissoc-in [:db :drag-target]))))

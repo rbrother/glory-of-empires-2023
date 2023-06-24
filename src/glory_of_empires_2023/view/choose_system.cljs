@@ -1,7 +1,8 @@
 (ns glory-of-empires-2023.view.choose-system
   (:require
     [clojure.string :as str]
-    [re-frame.core :refer [subscribe dispatch reg-event-db reg-sub]]
+    [glory-of-empires-2023.game-sync :as game-sync]
+    [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx reg-sub]]
     [glory-of-empires-2023.debug :as debug]
     [glory-of-empires-2023.logic.tiles :as tiles]
     [glory-of-empires-2023.subs :as subs]
@@ -78,8 +79,9 @@
   (fn [db [_ value]]
     (assoc-in db [:choose-system :text-filter] value)))
 
-(reg-event-db ::click-system [debug/log-event debug/validate-malli]
-  (fn [{tile :selected-tile :as db} [_ system-id]]
-    (-> db
-      (assoc-in [:game :board tile :system] system-id)
-      (dissoc :dialog, :choose-system, :selected-tile))))
+(reg-event-fx ::click-system [debug/log-event debug/validate-malli]
+  (fn [{{tile :selected-tile} :db :as fx} [_ system-id]]
+    (-> fx
+      (game-sync/update-game
+        (fn [game] (assoc-in game [:board tile :system] system-id) ))
+      (update :db #(dissoc % :dialog, :choose-system, :selected-tile)))))

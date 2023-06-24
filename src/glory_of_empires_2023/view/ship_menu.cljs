@@ -1,5 +1,6 @@
 (ns glory-of-empires-2023.view.ship-menu
   (:require [clojure.string :as str]
+            [glory-of-empires-2023.game-sync :as game-sync]
             [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx
                                    reg-sub inject-cofx]]
             [medley.core :refer [dissoc-in]]
@@ -40,22 +41,21 @@
 
 ;; helpers
 
-(defn unit-db-path [unit-id] [:game :units unit-id])
-
-(defn update-unit [db id fn] (update-in db (unit-db-path id) fn))
-
-
+(defn update-unit [fx id fn]
+  (game-sync/update-game fx
+    #(update-in % [:units id] fn)))
 
 ;; events
 
-(reg-event-db ::delete-ship [debug/log-event debug/validate-malli]
-  (fn [db [_ id]]
-    (dissoc-in db (unit-db-path id))))
+(reg-event-fx ::delete-ship [debug/log-event debug/validate-malli]
+  (fn [fx [_ id]]
+    (game-sync/update-game fx
+      (fn [game] (dissoc-in game [:units id])))))
 
-(reg-event-db ::add-hit-ship [debug/log-event debug/validate-malli]
-  (fn [db [_ id]]
-    (update-unit db id ships/inflict-hit)))
+(reg-event-fx ::add-hit-ship [debug/log-event debug/validate-malli]
+  (fn [fx [_ id]]
+    (update-unit fx id ships/inflict-hit)))
 
-(reg-event-db ::repair-ship [debug/log-event debug/validate-malli]
-  (fn [db [_ id]]
-    (update-unit db id #(assoc % :hits-taken 0))))
+(reg-event-fx ::repair-ship [debug/log-event debug/validate-malli]
+  (fn [fx [_ id]]
+    (update-unit fx id #(assoc % :hits-taken 0))))

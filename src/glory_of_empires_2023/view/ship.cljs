@@ -39,8 +39,7 @@
                   :on-drag-end #(dispatch [::drag-unit-end id])}]
       [damage unit]]
      [:div.unit-id (str/upper-case (name id))
-      (when unit-name (str " \"" unit-name "\""))
-      ]]))
+      (when unit-name (str " \"" unit-name "\""))]]))
 
 (defn view [units]
   [:<>
@@ -70,7 +69,7 @@
         :selected-tile))))
 
 (reg-event-db ::drag-unit-end [debug/log-event debug/validate-malli]
-  (fn [db [_ id]]
+  (fn [db [_ _id]]
     (dissoc db :drag-unit)))
 
 (reg-event-db ::click-unit [debug/log-event debug/validate-malli]

@@ -1,8 +1,7 @@
 (ns glory-of-empires-2023.view.main
   (:require
     [glory-of-empires-2023.debug :as debug :refer [log]]
-    [re-frame.core :refer [subscribe dispatch reg-event-db]]
-    [glory-of-empires-2023.aws.core :as aws]
+    [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx]]
     [glory-of-empires-2023.view.board :as board]
     [glory-of-empires-2023.view.login :as login]
     [glory-of-empires-2023.view.error :as error]
@@ -42,6 +41,8 @@
 
 ;; events
 
-(reg-event-db ::change-player [debug/log-event debug/validate-malli]
-  (fn [db [_ player]]
-    (assoc-in db [:game :current-player] (keyword player))))
+(reg-event-fx ::change-player [debug/log-event debug/validate-malli]
+  (fn [fx [_ player]]
+    (-> fx
+      (game-sync/update-game
+        #(assoc % :current-player (keyword player))))))

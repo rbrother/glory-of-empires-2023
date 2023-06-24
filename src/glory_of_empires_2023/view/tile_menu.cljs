@@ -1,6 +1,7 @@
 (ns glory-of-empires-2023.view.tile-menu
   (:require [clojure.string :as str]
-            [medley.core :refer [filter-vals remove-vals]]
+            [glory-of-empires-2023.game-sync :as game-sync]
+            [medley.core :refer [filter-vals remove-vals dissoc-in]]
             [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx
                                    reg-sub inject-cofx]]
             [glory-of-empires-2023.logic.utils :refer [attr=]]
@@ -21,6 +22,19 @@
       [comp/menu-item "Arrange Ships" [::arrange-ships]]
       [comp/menu-item "Add ships..." [::add-ships (or tile-owner (first (keys players)))]]]]))
 
+;; helpers
+
+(defn arrange-ships [{:keys [board] :as game} selected-tile]
+  (-> game
+    (update-in [:units]
+      (fn [units]
+        (let [ships (->> units (vals) (filter (attr= :location selected-tile)))
+              units-without-ships (->> units (remove-vals (attr= :location selected-tile)))]
+          (arrange-ships-to-tile
+            units-without-ships
+            (get board selected-tile)
+            ships))))))
+
 ;; events
 
 (reg-event-db ::choose-system [debug/log-event debug/validate-malli]
@@ -32,15 +46,8 @@
     (assoc db :dialog :add-ships
       :add-ships {:player player})))
 
-(reg-event-db ::arrange-ships [debug/log-event debug/validate-malli]
-  (fn [{{:keys [board]} :game, :keys [selected-tile] :as db} _]
-    (-> db
-      (update-in [:game :units]
-        (fn [units]
-          (let [ships (->> units (vals) (filter (attr= :location selected-tile)))
-                units-without-ships (->> units (remove-vals (attr= :location selected-tile)))]
-            (arrange-ships-to-tile
-              units-without-ships
-              (get board selected-tile)
-              ships))))
-      (dissoc :selected-tile))))
+(reg-event-fx ::arrange-ships [debug/log-event debug/validate-malli]
+  (fn [{{:keys [selected-tile]} :db :as fx} _]
+    (-> fx
+      (game-sync/update-game #(arrange-ships % selected-tile))
+      (dissoc-in [:db :selected-tile]))))
