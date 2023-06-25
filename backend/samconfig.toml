@@ -1,0 +1,9 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "sam-glory-of-empires"
+resolve_s3 = true
+s3_prefix = "sam-glory-of-empires"
+region = "eu-north-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
