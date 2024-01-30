@@ -12,8 +12,8 @@
 
 (defn- dynamo-db ^js/AWS.DynamoDB [db]
   (new (.-DynamoDB js/AWS)
-    #js {"region" (:region aws/config)
-         "credentials" (aws/credentials-object db)}))
+       #js {"region" (:region aws/config)
+            "credentials" (aws/credentials-object db)}))
 
 (def converter (-> js/AWS (.-DynamoDB) (.-Converter)))
 
@@ -22,19 +22,19 @@
 
 (defn unmarshall-from-ddb-item [ddb-object] ;; Convert {"N": "767} -> 767
   (-> converter
-    (.unmarshall ddb-object)
-    (js->clj :keywordize-keys true)
-    (json/keywords-from-json)))
+      (.unmarshall ddb-object)
+      (js->clj :keywordize-keys true)
+      (json/keywords-from-json)))
 
 (defn get-item [app-db table-name key opts data-callback]
   (-> (dynamo-db app-db)
-    (.getItem (clj->js
-                (merge {"TableName" table-name
-                        "Key" key}
-                  opts))
-      (aws/result-handler "Get Item from Database"
-        (fn [^js/Object data]
-          (data-callback (unmarshall-from-ddb-item (.-Item data))))))))
+      (.getItem (clj->js
+                  (merge {"TableName" table-name
+                          "Key" key}
+                         opts))
+                (aws/result-handler "Get Item from Database"
+                                    (fn [^js/Object data]
+                                      (data-callback (unmarshall-from-ddb-item (.-Item data))))))))
 
 (defn condition-failed? [err]
   (= (.-code err) "ConditionalCheckFailedException"))
@@ -43,11 +43,11 @@
                         condition-expression expression-attribute-values]}]
   (let [params (clj->js
                  (assoc-some {}
-                   "TableName" table-name
-                   "ReturnConsumedCapacity" "TOTAL"
-                   "Item" (marshall-to-ddb-item item)
-                   "ConditionExpression" condition-expression
-                   "ExpressionAttributeValues" expression-attribute-values))
+                             "TableName" table-name
+                             "ReturnConsumedCapacity" "TOTAL"
+                             "Item" (marshall-to-ddb-item item)
+                             "ConditionExpression" condition-expression
+                             "ExpressionAttributeValues" expression-attribute-values))
         handler (fn [err ^js/Object data]
                   (cond
                     (not err) (result-callback (js->clj data :keywordize-keys true))
@@ -62,8 +62,8 @@
 
 (defn get-game-version [app-db game-id callback-fn]
   (get-item app-db game-table-name {"id" {"S" game-id}}
-    {"ProjectionExpression" "id, version"}
-    callback-fn))
+            {"ProjectionExpression" "id, version"}
+            callback-fn))
 
 (defn save-game [app-db game expected-db-version callback-fn remote-newer-callback]
   (put-item {:app-db app-db, :table-name "glory-of-empires"

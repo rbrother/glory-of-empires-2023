@@ -62,35 +62,35 @@
 
 (defn free-id [existing-units ship-type]
   (->> existing-units
-    (keys)
-    (map (fn [id] (name id)))
-    (filter (fn [id] (= ship-type (keyword (subs id 0 2)))))
-    (map (fn [id] (js/parseInt (subs id 2))))
-    (cons 0)
-    (apply max)
-    (inc)
-    (str (name ship-type))
-    (keyword)))
+       (keys)
+       (map (fn [id] (name id)))
+       (filter (fn [id] (= ship-type (keyword (subs id 0 2)))))
+       (map (fn [id] (js/parseInt (subs id 2))))
+       (cons 0)
+       (apply max)
+       (inc)
+       (str (name ship-type))
+       (keyword)))
 
 (defn choose-new-ship-offset [ship-type space-locs units-in-the-tile]
   (let [unit-size (-> all-unit-types (ship-type) (:image-size) (first))
         placement-value
         (fn [loc-offset]
           (->> units-in-the-tile
-            (map (fn [{other-offset :offset, other-type :type}]
-                   (let [dist (distance (sub-vec other-offset loc-offset))
-                         same-type (= ship-type other-type)]
-                     (+ (when (< dist unit-size) (/ 20000 (inc dist))) ;; avoid overlap
-                       (if same-type dist (- dist)))))) ;; try to keep same together ;; separate ones keep away
-            (apply +)))]
+               (map (fn [{other-offset :offset, other-type :type}]
+                      (let [dist (distance (sub-vec other-offset loc-offset))
+                            same-type (= ship-type other-type)]
+                        (+ (when (< dist unit-size) (/ 20000 (inc dist))) ;; avoid overlap
+                           (if same-type dist (- dist)))))) ;; try to keep same together ;; separate ones keep away
+               (apply +)))]
     (->> space-locs
-      (map (fn [loc]
-             (let [loc-offset (sub-vec loc tiles/tile-center)]
-               {:loc loc-offset,
-                :placement-value (placement-value loc-offset)})))
-      (sort-by :placement-value)
-      (first)
-      (:loc))))
+         (map (fn [loc]
+                (let [loc-offset (sub-vec loc tiles/tile-center)]
+                  {:loc loc-offset,
+                   :placement-value (placement-value loc-offset)})))
+         (sort-by :placement-value)
+         (first)
+         (:loc))))
 
 (defn arrange-ships-to-tile [existing-units {tile-id :id, system :system :as tile} new-ships]
   (let [space-locs (space-locations (get tiles/all-systems system))
@@ -98,7 +98,7 @@
         (fn [units {ship-type :type :as ship}]
           (let [ship-id (or (:id ship) (free-id units ship-type))
                 units-in-the-tile (->> units (vals)
-                                    (filter (attr= :location tile-id)))]
+                                       (filter (attr= :location tile-id)))]
             (assoc units
               ship-id (assoc ship
                         :id ship-id
@@ -107,12 +107,12 @@
 
 (defn create-ships [existing-units prod-counts {tile-id :id, :as tile} owner]
   (let [new-ships (->> prod-counts
-                    (mapcat (fn [[type count]] (repeat count type))) ;; [:fi :fi :dr]
-                    (map (fn [type]
-                           {:type type
-                            :owner owner
-                            :location tile-id
-                            :hits-taken 0})))]
+                       (mapcat (fn [[type count]] (repeat count type))) ;; [:fi :fi :dr]
+                       (map (fn [type]
+                              {:type type
+                               :owner owner
+                               :location tile-id
+                               :hits-taken 0})))]
     (arrange-ships-to-tile existing-units tile new-ships)))
 
 (defn inflict-hit [unit] (update unit :hits-taken inc))

@@ -16,14 +16,14 @@
   defaults
   [:body (assoc default-font :user-select "none")]
   [:input (assoc default-font :border "1px solid white" :border-radius "3px"
-            :padding "4px" :margin "4px")]
+                              :padding "4px" :margin "4px")]
   [:button (assoc default-font :border "1px solid white" :border-radius "3px"
-             :padding "4px 8px 4px 8px" :margin "4px" :min-width "32px")]
+                               :padding "4px 8px 4px 8px" :margin "4px" :min-width "32px")]
   [:button:hover {:filter "brightness(1.5)"}]
   [:button.ok {:margin "8px" :width "150px", :background "#050"}]
   [:button.cancel {:margin "8px" :width "150px", :background "#500"}]
   [:select (assoc default-font :border "1px solid white" :border-radius "3px"
-             :padding "4px" :margin "4px")]
+                               :padding "4px" :margin "4px")]
   [:.relative {:position "relative"}]
   [:.absolute {:position "absolute"}]
   [:.pad {:padding "8px"}]

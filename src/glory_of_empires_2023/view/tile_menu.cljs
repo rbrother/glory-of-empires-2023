@@ -26,14 +26,14 @@
 
 (defn arrange-ships [{:keys [board] :as game} selected-tile]
   (-> game
-    (update-in [:units]
-      (fn [units]
-        (let [ships (->> units (vals) (filter (attr= :location selected-tile)))
-              units-without-ships (->> units (remove-vals (attr= :location selected-tile)))]
-          (arrange-ships-to-tile
-            units-without-ships
-            (get board selected-tile)
-            ships))))))
+      (update-in [:units]
+                 (fn [units]
+                   (let [ships (->> units (vals) (filter (attr= :location selected-tile)))
+                         units-without-ships (->> units (remove-vals (attr= :location selected-tile)))]
+                     (arrange-ships-to-tile
+                       units-without-ships
+                       (get board selected-tile)
+                       ships))))))
 
 ;; events
 
@@ -44,10 +44,10 @@
 (reg-event-db ::add-ships [debug/log-event debug/validate-malli]
   (fn [db [_ player]]
     (assoc db :dialog :add-ships
-      :add-ships {:player player})))
+              :add-ships {:player player})))
 
 (reg-event-fx ::arrange-ships [debug/log-event debug/validate-malli]
   (fn [{{:keys [selected-tile]} :db :as fx} _]
     (-> fx
-      (game-sync/update-game #(arrange-ships % selected-tile))
-      (dissoc-in [:db :selected-tile]))))
+        (game-sync/update-game #(arrange-ships % selected-tile))
+        (dissoc-in [:db :selected-tile]))))

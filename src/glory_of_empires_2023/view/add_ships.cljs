@@ -123,11 +123,11 @@
          {:keys [prod-counts]} :add-ships
          {:keys [board current-player]} :game} :db :as fx} _]
     (-> fx
-      (game-sync/update-game
-        (fn [game]
-          (update game :units
-            #(ships/create-ships % prod-counts (get board selected-tile) current-player))))
-      (update :db #(dissoc % :dialog :add-ships :selected-tile)))))
+        (game-sync/update-game
+          (fn [game]
+            (update game :units
+                    #(ships/create-ships % prod-counts (get board selected-tile) current-player))))
+        (update :db #(dissoc % :dialog :add-ships :selected-tile)))))
 
 (reg-event-db ::cancel [debug/log-event debug/validate-malli]
   (fn [db _] (dissoc db :dialog :add-ships :selected-tile)))

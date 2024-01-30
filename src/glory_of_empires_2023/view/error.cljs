@@ -6,7 +6,7 @@
   (let [{:keys [type message time operation]} @(subscribe [::error])]
     (when type
       [:div.error
-       [:span time ": Failed " operation ": " type ". See log for details" ]
+       [:span time ": Failed " operation ": " type ". See log for details"]
        [:span [:button {:on-click #(dispatch [::dismiss])} "Dismiss"]]])))
 
 ;; subs

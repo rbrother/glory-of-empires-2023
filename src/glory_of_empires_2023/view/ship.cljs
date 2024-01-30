@@ -22,8 +22,8 @@
 (defn unit [{unit-name :name, :keys [id image-name image-size color offset] :as unit}]
   (let [this-selected? @(subscribe [::selected-unit? id])
         [x y] (-> (mul-vec tiles/tile-size 0.5)
-                (sub-vec (mul-vec image-size 0.5))
-                (add-vec offset))]
+                  (sub-vec (mul-vec image-size 0.5))
+                  (add-vec offset))]
     [:div {:style {:position :absolute, :left x, :top y
                    :z-index (if this-selected? 11 10)}}
      (when this-selected? [ship-menu/view id])
@@ -64,9 +64,9 @@
 (reg-event-db ::drag-unit [debug/log-event debug/validate-malli]
   (fn [db [_ id]]
     (-> db
-      (assoc :drag-unit id)
-      (dissoc :selected-unit
-        :selected-tile))))
+        (assoc :drag-unit id)
+        (dissoc :selected-unit
+                :selected-tile))))
 
 (reg-event-db ::drag-unit-end [debug/log-event debug/validate-malli]
   (fn [db [_ _id]]
@@ -77,4 +77,4 @@
     (if (= selected-unit id)
       (dissoc db :selected-unit)
       (-> db (assoc :selected-unit id)
-        (dissoc :selected-tile)))))
+          (dissoc :selected-tile)))))

@@ -57,23 +57,23 @@
 (defn filter-system-by-text [text systems]
   (let [pat (re-pattern (str "(?i)" text))]
     (->> systems
-      (filter (fn [{:keys [id]}]
-                (re-find pat (name id)))))))
+         (filter (fn [{:keys [id]}]
+                   (re-find pat (name id)))))))
 
 (reg-sub ::systems :<- [::type-filter] :<- [::text-filter]
   (fn [[type-filter text-filter] _]
     (cond->> tiles/all-systems-list
-      type-filter (filter (fn [{:keys [type]}]
-                            (= type type-filter)))
-      (not= text-filter "") (filter-system-by-text text-filter))))
+             type-filter (filter (fn [{:keys [type]}]
+                                   (= type type-filter)))
+             (not= text-filter "") (filter-system-by-text text-filter))))
 
 ;; events
 
 (reg-event-db ::change-system-type-filter [debug/log-event debug/validate-malli]
   (fn [db [_ value]]
     (assoc-in db [:choose-system :type-filter]
-      (if (= value "all") nil
-        (keyword value)))))
+              (if (= value "all") nil
+                                  (keyword value)))))
 
 (reg-event-db ::change-system-text-filter [debug/log-event debug/validate-malli]
   (fn [db [_ value]]
@@ -82,6 +82,6 @@
 (reg-event-fx ::click-system [debug/log-event debug/validate-malli]
   (fn [{{tile :selected-tile} :db :as fx} [_ system-id]]
     (-> fx
-      (game-sync/update-game
-        (fn [game] (assoc-in game [:board tile :system] system-id) ))
-      (update :db #(dissoc % :dialog, :choose-system, :selected-tile)))))
+        (game-sync/update-game
+          (fn [game] (assoc-in game [:board tile :system] system-id)))
+        (update :db #(dissoc % :dialog, :choose-system, :selected-tile)))))

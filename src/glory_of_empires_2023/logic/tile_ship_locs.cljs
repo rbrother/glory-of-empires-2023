@@ -16,28 +16,28 @@
 
 (def drag-target-rows
   (concat drag-target-rows-half
-    (->> drag-target-rows-half
-      (map (fn [{:keys [y] :as row}]
-             (assoc row :y (- 360 y)))))))
+          (->> drag-target-rows-half
+               (map (fn [{:keys [y] :as row}]
+                      (assoc row :y (- 360 y)))))))
 
 (def drag-target-locs
   (->> drag-target-rows
-    (mapcat (fn [{:keys [x y count]}]
-              (->> (range count)
-                (map (fn [n] [(+ x (* n ship-location-size)), y])))))
-    (vec)))
+       (mapcat (fn [{:keys [x y count]}]
+                 (->> (range count)
+                      (map (fn [n] [(+ x (* n ship-location-size)), y])))))
+       (vec)))
 
 (defn space-location? [pos planet-locs]
   (->> planet-locs
-    (some (fn [planet-loc]
-            (< (distance (sub-vec pos planet-loc)) 80)))
-    (not)))
+       (some (fn [planet-loc]
+               (< (distance (sub-vec pos planet-loc)) 80)))
+       (not)))
 
 (defn space-locations [tile]
   (let [planet-locs (->> tile (:planets) (vals) (map :loc)
-                      (map #(add-vec % tile-center)))
+                         (map #(add-vec % tile-center)))
         target-center (mul-vec [ship-location-size ship-location-size] 0.5)]
     (->> drag-target-locs
-      (filter (fn [loc]
-                (space-location? (add-vec loc target-center) planet-locs)))
-      (vec))))
+         (filter (fn [loc]
+                   (space-location? (add-vec loc target-center) planet-locs)))
+         (vec))))

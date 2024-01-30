@@ -17,10 +17,10 @@
 
 (defn create-websocket []
   (ws/create sync-api-url
-    {:on-open #(dispatch [::websocket-opened])
-     :on-close #(dispatch [::websocket-closed])
-     :on-error (fn [] (log "WS error"))
-     :on-message #(dispatch [::websocket-message-received (.-data %)])}))
+             {:on-open #(dispatch [::websocket-opened])
+              :on-close #(dispatch [::websocket-closed])
+              :on-error (fn [] (log "WS error"))
+              :on-message #(dispatch [::websocket-message-received (.-data %)])}))
 
 (reg-event-fx ::websocket-message-received [debug/log-event debug/validate-malli]
   (fn [{db :db} [_ data-str]]
@@ -40,33 +40,33 @@
 (reg-event-db ::create-websocket
   (fn [db _]
     (assoc-in db [:login :websocket]
-      (create-websocket))))
+              (create-websocket))))
 
 (reg-event-db ::send-websocket-message [debug/log-event debug/validate-malli]
   (fn [db [_ message]]
     (let [ws (get-in db [:login :websocket])]
       (ws/send ws (assoc message :action "sendmessage")
-        wscljs.format/json))
+               wscljs.format/json))
     db))
 
 (reg-event-db ::fetch-game [debug/log-event debug/validate-malli]
   (fn [db _]
     (dynamo-db/get-game db game-id
-      (fn [game] (dispatch [::game-received game])))
+                        (fn [game] (dispatch [::game-received game])))
     (assoc db :fetching game-id)))
 
 (reg-event-fx ::game-received [debug/log-event debug/validate-malli]
   (fn [{db :db} [_ game]]
     {:db (-> db
-           (assoc :game game
-             :game-db game)
-           (dissoc :fetching))}))
+             (assoc :game game
+                    :game-db game)
+             (dissoc :fetching))}))
 
 (reg-event-fx ::game-saved [debug/log-event debug/validate-malli]
   (fn [{db :db} [_ saved-game _result]]
     {:db (-> db
-           (dissoc :fetching)
-           (assoc :game-db saved-game))
+             (dissoc :fetching)
+             (assoc :game-db saved-game))
      :dispatch [::send-websocket-message {:current-player (get-in db [:game :current-player])}]}))
 
 (reg-event-fx ::game-update-received [debug/log-event debug/validate-malli]
@@ -91,15 +91,15 @@
 (reg-event-fx ::update-game-from-server
   (fn [{{:keys [game] :as db} :db} _]
     (dynamo-db/get-game db (:id game)
-      (fn [game] (dispatch [::game-update-received game])))
+                        (fn [game] (dispatch [::game-update-received game])))
     {:db (assoc db :fetching game-id)}))
 
 (reg-event-fx ::save-game [debug/log-event debug/validate-malli]
   (fn [{{:keys [game game-db] :as db} :db} _]
     (let [new-game (update game :version inc)]
       (dynamo-db/save-game db new-game (:version game-db)
-        #(dispatch [::game-saved new-game %])
-        #(dispatch [::update-game-from-server]))
+                           #(dispatch [::game-saved new-game %])
+                           #(dispatch [::update-game-from-server]))
       {:db (assoc db
              :fetching game-id
              :game new-game)})))

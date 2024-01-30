@@ -23,11 +23,11 @@
          [:div.ship-drop-loc
           {:style (assoc-some {:left x, :top y, :width (dec ship-location-size),
                                :height (dec ship-location-size)}
-                    :background (when this-current? "yellow"))
+                              :background (when this-current? "yellow"))
            ;; preventDefault in :on-drag-enter and :on-drag-over
            ;; identifies the tile as drop target for the browser
            :on-drag-enter #(do (.preventDefault %)
-                             (dispatch [::drag-enter id loc-center]))
+                               (dispatch [::drag-enter id loc-center]))
            :on-drag-over #(.preventDefault %)
            :on-drop #(dispatch [::drop-on-tile tile offset])}]))]))
 
@@ -43,14 +43,14 @@
 (reg-event-db ::drag-enter [debug/validate-malli]
   (fn [db [_ tile-id loc-center]]
     (assoc db :drag-target
-      {:tile-id tile-id, :loc-center loc-center})))
+              {:tile-id tile-id, :loc-center loc-center})))
 
 (reg-event-fx ::drop-on-tile [debug/log-event debug/validate-malli]
   (fn [{{:keys [drag-unit]} :db :as fx}
        [_ {tile-id :id} drop-pos]]
     (-> fx
-      (game-sync/update-game
-        (fn [game]
-          (update-in game [:units drag-unit]
-            #(assoc % :location tile-id, :offset drop-pos))))
-      (dissoc-in [:db :drag-target]))))
+        (game-sync/update-game
+          (fn [game]
+            (update-in game [:units drag-unit]
+                       #(assoc % :location tile-id, :offset drop-pos))))
+        (dissoc-in [:db :drag-target]))))

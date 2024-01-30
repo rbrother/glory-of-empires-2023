@@ -30,7 +30,7 @@
    [error/error-message]
    [dialog]
    [:div "Current Player" [race-selector]]
-   [:div [:button {:on-click #(dispatch [::game-sync/fetch-game]) } "GET GAME"]]
+   [:div [:button {:on-click #(dispatch [::game-sync/fetch-game])} "GET GAME"]]
    [board/view]])
 
 (defn main-panel []
@@ -44,5 +44,5 @@
 (reg-event-fx ::change-player [debug/log-event debug/validate-malli]
   (fn [fx [_ player]]
     (-> fx
-      (game-sync/update-game
-        #(assoc % :current-player (keyword player))))))
+        (game-sync/update-game
+          #(assoc % :current-player (keyword player))))))

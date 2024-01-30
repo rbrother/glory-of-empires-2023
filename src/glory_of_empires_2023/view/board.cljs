@@ -26,11 +26,11 @@
 
 (defn closest-tile-to [tiles pos]
   (->> tiles
-    (map (fn [{:keys [center-pos] :as tile}]
-           (let [diff (sub-vec pos center-pos)]
-             (assoc tile :distance (distance diff)))))
-    (sort-by :distance)
-    (first)))
+       (map (fn [{:keys [center-pos] :as tile}]
+              (let [diff (sub-vec pos center-pos)]
+                (assoc tile :distance (distance diff)))))
+       (sort-by :distance)
+       first))
 
 (def tile-highlight
   [:svg {:viewBox "0 0 432 376"}
@@ -92,7 +92,7 @@
         closest ::closest-tile-to-cursor} _]
     (let [selected? (= earlier-tile (:id closest))]
       {:db (cond-> db
-             (not selected?) (assoc :selected-tile (:id closest))
-             selected? (dissoc :selected-tile)
-             true (assoc :tile-click-pos (sub-vec board-mouse-pos (:screen-pos closest)))
-             true (dissoc :selected-unit))})))
+                   (not selected?) (assoc :selected-tile (:id closest))
+                   selected? (dissoc :selected-tile)
+                   true (assoc :tile-click-pos (sub-vec board-mouse-pos (:screen-pos closest)))
+                   true (dissoc :selected-unit))})))

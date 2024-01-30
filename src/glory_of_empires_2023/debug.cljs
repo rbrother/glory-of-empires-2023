@@ -53,6 +53,6 @@
                (if error
                  (do
                    (log-color (str "[VALIDATION FAILURE] " (first (:event coeffects))
-                                "\n" error) "red")
+                                   "\n" error) "red")
                    (assoc-in context [:effects :db] orig-db)) ;; ignore changes if errors
                  context)))))

@@ -43,14 +43,14 @@
 
 (defn update-unit [fx id fn]
   (game-sync/update-game fx
-    #(update-in % [:units id] fn)))
+                         #(update-in % [:units id] fn)))
 
 ;; events
 
 (reg-event-fx ::delete-ship [debug/log-event debug/validate-malli]
   (fn [fx [_ id]]
     (game-sync/update-game fx
-      (fn [game] (dissoc-in game [:units id])))))
+                           (fn [game] (dissoc-in game [:units id])))))
 
 (reg-event-fx ::add-hit-ship [debug/log-event debug/validate-malli]
   (fn [fx [_ id]]

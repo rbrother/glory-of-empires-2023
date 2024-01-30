@@ -29,7 +29,7 @@
 
 (defn vals-with-id [m]
   (->> m
-    (map (fn [[id attr]] (assoc attr :id id)))))
+       (map (fn [[id attr]] (assoc attr :id id)))))
 
 (defn attr= [attr value]
   (fn [item] (= (get item attr) value)))

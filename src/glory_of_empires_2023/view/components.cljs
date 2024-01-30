@@ -36,4 +36,4 @@
     ;; itself is clicked. We close the dialog only if the target is
     ;; actually the background and not the dialog.
     (cond-> db
-      (= target "dialog-background") (dissoc :dialog))))
+            (= target "dialog-background") (dissoc :dialog))))

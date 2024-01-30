@@ -11,7 +11,7 @@
 
 (defn- keyword-to-json [k]
   (if (keyword? k) (str "~" k)
-    k))
+                   k))
 
 (defn keywords-to-json [data]
   (walk-atomic-values keyword-to-json data))

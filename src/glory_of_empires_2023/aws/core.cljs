@@ -36,8 +36,8 @@
     ;; It is not fully clear if this allows extension of the credentials beyond the ID-token limit
     ;; since it is still based on the same ID token
     (.refresh (credentials-object db)
-      (fn [err]
-        (if err (handle-error "Refresh Credentials" err)
-          (log "Credentials successfully renewed"))))
+              (fn [err]
+                (if err (handle-error "Refresh Credentials" err)
+                        (log "Credentials successfully renewed"))))
     {:db db
-     :dispatch-later {:ms mins-30 :dispatch [::renew-credentials]} }))
+     :dispatch-later {:ms mins-30 :dispatch [::renew-credentials]}}))

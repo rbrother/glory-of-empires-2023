@@ -24,17 +24,17 @@
 (defn amend-tile-ids [map-pieces]
   (let [min-loc (utils/min-pos (map :logical-pos map-pieces))]
     (->> map-pieces
-      (map (fn [tile]
-             (assoc tile :id
-               (location-id (:logical-pos tile) min-loc)))))))
+         (map (fn [tile]
+                (assoc tile :id
+                            (location-id (:logical-pos tile) min-loc)))))))
 
 (defn- make-board [initial-range-size piece-filter]
   (let [a-range (range (- initial-range-size) (inc initial-range-size))]
     (->> (utils/range2d a-range a-range)
-      (filter piece-filter)
-      (map (fn [pos] (setup-system pos (logical-distance pos))))
-      (amend-tile-ids)
-      (index-by :id))))
+         (filter piece-filter)
+         (map (fn [pos] (setup-system pos (logical-distance pos))))
+         (amend-tile-ids)
+         (index-by :id))))
 
 (defn round-board [rings]
   (make-board rings (fn [pos] (< (logical-distance pos) rings))))
