@@ -71,6 +71,9 @@
 (reg-sub ::selected-tile
   (fn [db _] (:selected-tile db))) ;; eg. :a3
 
+(reg-sub ::selected-planet
+  (fn [db _] (:selected-planet db))) ;; eg. :aeon
+
 (reg-sub ::selected-tile-owner :<- [::selected-tile] :<- [::units-by-location]
   (fn [[tile units-by-loc] _]
     (-> (get units-by-loc tile) (first) (:owner))))

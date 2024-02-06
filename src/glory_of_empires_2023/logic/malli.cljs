@@ -40,6 +40,7 @@
    [:board-mouse-pos {:optional true} vector2]
    [:tile-click-pos {:optional true} vector2]
    [:selected-tile {:optional true} :keyword]
+   [:selected-planet {:optional true} [:maybe :keyword]]
    [:dialog {:optional true} :keyword]
    [:drag-unit {:optional true} :keyword]
    [:selected-unit {:optional true} :keyword]
