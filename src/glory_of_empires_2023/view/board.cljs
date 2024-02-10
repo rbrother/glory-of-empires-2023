@@ -12,6 +12,7 @@
     [glory-of-empires-2023.view.ship :as ship]
     [glory-of-empires-2023.view.drag-targets :as drag-targets]
     [glory-of-empires-2023.view.tile-menu :as tile-menu]
+    [glory-of-empires-2023.view.planet-menu :as planet-menu]
     [glory-of-empires-2023.view.components :refer [image-dir]]))
 
 ;; helpers
@@ -59,11 +60,13 @@
         selected-planet @(subscribe [::subs/selected-planet])
         selected? (= id selected-planet)]
     (when (or hover-on? selected?)
-      [:div.highlight
-       [:svg {:viewBox "0 0 432 376"}
-        [:circle {:stroke-width "4px", :stroke "white"
-                  :fill (if selected? "rgba(255,255,255,0.25)" "transparent")
-                  :cx (+ 216 x) :cy (+ 188 y) :r (or radius planet-default-radius)}]]])))
+      [:<>
+       (when selected? [planet-menu/view id])
+       [:div.highlight
+        [:svg {:viewBox "0 0 432 376"}
+         [:circle {:stroke-width "4px", :stroke "white"
+                   :fill (if selected? "rgba(255,255,255,0.25)" "transparent")
+                   :cx (+ 216 x) :cy (+ 188 y) :r (or radius planet-default-radius)}]]]])))
 
 (defn tile [{[x y] :screen-pos :keys [image id units planets] :as tile}]
   (let [id-str (str/upper-case (name id))
