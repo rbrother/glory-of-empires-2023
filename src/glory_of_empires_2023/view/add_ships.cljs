@@ -1,9 +1,10 @@
 (ns glory-of-empires-2023.view.add-ships
   (:require
     [clojure.string :as str]
+    [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx reg-sub]]
+    [glory-of-empires-2023.logic.utils :refer [attr=]]
     [glory-of-empires-2023.game-sync :as game-sync]
     [glory-of-empires-2023.logic.races :as races]
-    [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx reg-sub]]
     [glory-of-empires-2023.debug :as debug]
     [glory-of-empires-2023.logic.ships :as ships]
     [glory-of-empires-2023.subs :as subs]
@@ -26,19 +27,21 @@
                :on-click (handler-no-propagate [::dec-prod-count ship-type])} "-"]]))
 
 (defn ship-info-row [{ship-name :name, [width height] :image-size,
-                      :keys [id image-name hit-points prod-cost prod-slots
+                      :keys [id image-name hit-points prod-cost prod-slots token rotation
                              fire-count fire-percent speed carry special]}
                      owner]
   (let [race-info (get races/all-races owner)
         color (:unit-color race-info)
-        rotate? (> height width)
+        rotate? (= rotation 90)
         [width-rot, height-rot] (if rotate? [height width] [width height])]
     [:<>
      [:div.ship-type-grid-item (str/upper-case (name id))]
      [:div.ship-type-grid-item ship-name]
      [:div.ship-type-grid-item
       {:style {:height height-rot, :position "relative"}}
-      [:img {:src (str image-dir "Ships/" color "/Unit-" color "-" image-name ".png")
+      [:img {:src (if token
+                    (str image-dir "Ships/" image-name ".png")
+                    (str image-dir "Ships/" color "/Unit-" color "-" image-name ".png"))
              :style {:position "absolute"
                      :left (+ 8 (* 0.5 (- height height-rot)))
                      :top (+ 8 (* 0.5 (- width width-rot)))
@@ -84,23 +87,33 @@
    [:div.ship-type-grid-item.bold "Produce"]
    [:div]])
 
+(defn title []
+  (let [dialog-type @(subscribe [::subs/dialog])
+        selected-tile @(subscribe [::subs/selected-tile])
+        selected-planet @(subscribe [::subs/selected-planet])]
+    [:span (if (= dialog-type :add-units)
+             (str "Add New Units to planet " (str/capitalize (name selected-planet)))
+             (str "Add New Ships to system " (str/capitalize (name selected-tile))))]))
+
+(defn ship-types []
+  (let [dialog-type @(subscribe [::subs/dialog])
+        unit-type (if (= dialog-type :add-ships) :ship :ground)]
+    (filter (attr= :type unit-type) ships/all-unit-types-arr)))
+
 (defn view []
-  (let [selected-tile @(subscribe [::subs/selected-tile])
-        ship-types (filter #(= (:type %) :ship) ships/all-unit-types-arr)
-        player @(subscribe [::subs/current-player])]
-    [components/dialog {:title [:span "Add New Ships to system "
-                                (str/upper-case (name selected-tile))]}
+  (let [player @(subscribe [::subs/current-player])]
+    [components/dialog {:title [title]}
      [:div.ship-types-grid
       [headers1]
       [headers2]
-      (for [ship-type ship-types]
+      (for [ship-type (ship-types)]
         ^{:key (:id ship-type)}
         [ship-info-row ship-type player])]
      [components/ok-cancel [::ok] [::cancel]]]))
 
 ;; subs
 
-(reg-sub ::add-ships (fn [db _] (:add-ships db))) ;; State of the dialog
+(reg-sub ::add-ships (fn [db _] (:add-ships db)))           ;; State of the dialog
 
 (reg-sub ::prod-counts :<- [::add-ships]
   (fn [add-ships _] (:prod-counts add-ships)))
@@ -119,14 +132,14 @@
     (update-in db [:add-ships :prod-counts ship-type] dec-count)))
 
 (reg-event-fx ::ok [debug/log-event debug/validate-malli]
-  (fn [{{:keys [selected-tile]
+  (fn [{{:keys [selected-tile selected-planet]
          {:keys [prod-counts]} :add-ships
          {:keys [board current-player]} :game} :db :as fx} _]
     (-> fx
         (game-sync/update-game
           (fn [game]
             (update game :units
-                    #(ships/create-ships % prod-counts (get board selected-tile) current-player))))
+                    #(ships/create-ships % prod-counts (get board selected-tile) selected-planet current-player))))
         (update :db #(dissoc % :dialog :add-ships :selected-tile)))))
 
 (reg-event-db ::cancel [debug/log-event debug/validate-malli]

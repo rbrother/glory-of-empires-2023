@@ -62,6 +62,7 @@
            {:fi3 {:type :fi, :owner :norr, :location :b3, :offset [129 -8]}}
            {:fi 2, :de 1, :cr 2}
            {:id :b3, :logical-pos [0 1], :system :amun}
+           nil
            :mentak)
          {:fi3 {:type :fi, :owner :norr, :location :b3, :offset [129 -8]},
           :fi4 {:type :fi, :owner :mentak, :location :b3, :hits-taken 0, :id :fi4, :offset [119 -58]},

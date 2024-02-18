@@ -55,18 +55,20 @@
      :d "M 110 4    L 4 188    L 110 372
          L 322 372  L 428 188  L 322 4    L 110 4"}]])
 
-(defn planet-view [{[x y] :loc :keys [id radius]}]
+(defn planet-view [{[x y] :loc :keys [id radius units]}]
   (let [hover-on? @(subscribe [::hover-on-planet? id])
         selected-planet @(subscribe [::subs/selected-planet])
         selected? (= id selected-planet)]
-    (when (or hover-on? selected?)
-      [:<>
-       (when selected? [planet-menu/view id])
-       [:div.highlight
-        [:svg {:viewBox "0 0 432 376"}
-         [:circle {:stroke-width "4px", :stroke "white"
-                   :fill (if selected? "rgba(255,255,255,0.25)" "transparent")
-                   :cx (+ 216 x) :cy (+ 188 y) :r (or radius planet-default-radius)}]]]])))
+    [:div
+     [ship/view units]
+     (when (or hover-on? selected?)
+       [:<>
+        (when selected? [planet-menu/view id])
+        [:div.highlight
+         [:svg {:viewBox "0 0 432 376"}
+          [:circle {:stroke-width "4px", :stroke "white"
+                    :fill (if selected? "rgba(255,255,255,0.25)" "transparent")
+                    :cx (+ 216 x) :cy (+ 188 y) :r (or radius planet-default-radius)}]]]])]))
 
 (defn tile [{[x y] :screen-pos :keys [image id units planets] :as tile}]
   (let [id-str (str/upper-case (name id))

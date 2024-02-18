@@ -41,3 +41,8 @@
          (filter (fn [loc]
                    (space-location? (add-vec loc target-center) planet-locs)))
          (vec))))
+
+(defn ground-locations [planet-id]
+  ;; TODO: IMPLEMENT
+  [0 0]
+  )

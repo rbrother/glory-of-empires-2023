@@ -23,5 +23,5 @@
 (reg-event-db ::add-units [debug/log-event debug/validate-malli]
   (fn [db [_ player]]
     (assoc db :dialog :add-units
-      :add-units {:player player})))
+              :add-ships {:player player})))
 

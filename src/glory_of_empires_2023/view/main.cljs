@@ -23,6 +23,7 @@
   (case @(subscribe [::subs/dialog])
     :choose-system [choose-system/view]
     :add-ships [add-ships/view]
+    :add-units [add-ships/view]
     nil))
 
 (defn game-panel []

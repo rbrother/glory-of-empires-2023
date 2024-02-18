@@ -41,6 +41,9 @@
          (utils/vals-with-id)
          (group-by :location))))
 
+(defn amend-planet [id planet all-units]
+  (assoc planet :units (get all-units id)))
+
 (defn amend-tile [{:keys [id logical-pos system] :as tile} all-units]
   (let [units (get all-units id)]
     (-> tile
@@ -48,7 +51,11 @@
           :screen-pos (tiles/screen-loc logical-pos)
           :units units
           :owner (:owner (first units))) ;; TODO: Also take flag-tokens into account if no units
-        (merge (-> system (tiles/all-systems) (dissoc :id))))))
+        (merge (-> system (tiles/all-systems) (dissoc :id)))
+        (update :planets
+                (fn [planets] (->> planets
+                                   (map (fn [[id planet]] [id (amend-planet id planet all-units)]))
+                                   (into {})))))))
 
 (defn shift-tiles-zero [tiles]
   (let [min (utils/min-pos (map :screen-pos tiles))]
