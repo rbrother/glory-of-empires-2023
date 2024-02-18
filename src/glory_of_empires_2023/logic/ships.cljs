@@ -85,13 +85,8 @@
                            (if same-type dist (- dist)))))) ;; try to keep same together ;; separate ones keep away
                (apply +)))]
     (->> available-locs
-         (map (fn [loc]
-                (let [loc-offset (sub-vec loc tiles/tile-center)]
-                  {:loc loc-offset,
-                   :placement-value (placement-value loc-offset)})))
-         (sort-by :placement-value)
-         first
-         :loc)))
+         (map (fn [loc] (sub-vec loc tiles/tile-center)))
+         (apply min-key placement-value available-locs))))
 
 (defn arrange-unit [all-existing-units location-id target-locs {unit-type :type :as unit}]
   (let [unit-id (or (:id unit) (free-id all-existing-units unit-type))
