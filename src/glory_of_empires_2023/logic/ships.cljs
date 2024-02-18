@@ -108,7 +108,7 @@
 
 (defn arrange-ships-to-tile [existing-units {tile-id :id, system :system :as tile} new-ships]
   (arrange-units-to-locs existing-units, tile-id
-                         (space-locations (get tiles/all-systems system) :space)
+                         (space-locations (-> system tiles/all-systems :planets))
                          new-ships))
 
 (defn arrange-units-to-planet [existing-units {planet-id :id :as planet} new-units]

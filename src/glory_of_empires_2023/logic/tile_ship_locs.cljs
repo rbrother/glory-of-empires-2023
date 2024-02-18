@@ -1,5 +1,6 @@
 (ns glory-of-empires-2023.logic.tile-ship-locs
-  (:require [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance]]
+  (:require [clojure.set :refer [difference]]
+            [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance]]
             [glory-of-empires-2023.logic.tiles :refer [tile-center]]))
 
 (def ship-location-size 20)
@@ -26,16 +27,11 @@
   (->> drag-target-rows
        (mapcat (fn [{:keys [x y count]}]
                  (->> (range count)
-                      (map (fn [n] [(+ x (* n ship-location-size)), y])))))
-       vec))
+                      (map (fn [n] [(+ x (* n ship-location-size)), y])))))))
 
 (defn pos-on-planet? [pos {planet-loc :loc radius :radius :as _planet}]
   (< (distance (sub-vec pos (add-vec planet-loc tile-center)))
      (or radius 80)))
-
-(defn space-location? [pos planets]
-  (->> planets, vals
-       (not-any? #(pos-on-planet? pos %))))
 
 ;; Does pos represent planet or the tile itself?
 (defn target-loc-id [pos {:keys [planets] :as tile}]
@@ -44,15 +40,14 @@
                     first)]
     (or (:id planet) (:id tile))))
 
-(defn space-locations [{:keys [planets] :as tile} type]
-  (let [invert? (if (= type :space) identity not)]
-    (->> drag-target-locs
-         (filter (fn [loc]
-                   (invert?
-                     (space-location? (add-vec loc target-center) planets))))
-         vec)))
-
 (defn planet-locations [planet]
   (->> drag-target-locs
-       (filter (fn [loc] (pos-on-planet? loc planet)))
-       vec))
+       (filter (fn [loc]
+                 (pos-on-planet? (add-vec loc target-center) planet)))))
+
+(defn all-planet-locations [planets]
+  (->> planets, vals
+       (mapcat planet-locations)))
+
+(defn space-locations [planets]
+  (difference (set drag-target-locs) (set (all-planet-locations planets))))

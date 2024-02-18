@@ -65,8 +65,8 @@
            nil
            :mentak)
          {:fi3 {:type :fi, :owner :norr, :location :b3, :offset [129 -8]},
-          :fi4 {:type :fi, :owner :mentak, :location :b3, :hits-taken 0, :id :fi4, :offset [119 -58]},
-          :fi5 {:type :fi, :owner :mentak, :location :b3, :hits-taken 0, :id :fi5, :offset [79 -18]},
+          :fi4 {:type :fi, :owner :mentak, :location :b3, :hits-taken 0, :id :fi4, :offset [79 -18]},
+          :fi5 {:type :fi, :owner :mentak, :location :b3, :hits-taken 0, :id :fi5, :offset [119 -58]},
           :de1 {:type :de, :owner :mentak, :location :b3, :hits-taken 0, :id :de1, :offset [-181 2]},
           :cr1 {:type :cr, :owner :mentak, :location :b3, :hits-taken 0, :id :cr1, :offset [-101 142]},
           :cr2 {:type :cr, :owner :mentak, :location :b3, :hits-taken 0, :id :cr2, :offset [-141 82]}})))

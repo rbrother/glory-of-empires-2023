@@ -9,16 +9,17 @@
     [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance]]
     [glory-of-empires-2023.logic.tiles :refer [tile-center]]
     [glory-of-empires-2023.logic.tile-ship-locs
-     :refer [space-locations ship-location-size target-loc-id]]
+     :refer [space-locations all-planet-locations ship-location-size target-loc-id]]
     [glory-of-empires-2023.view.ship :as ship]))
 
-(defn view [{id :id :as tile}]
+(defn view [{id :id, planets :planets :as tile}]
   (let [dragging-unit @(subscribe [::ship/drag-unit])
         unit-type (some-> dragging-unit name (subs 0 2) keyword)
         ship? (some-> unit-type (ships/all-unit-types) :type (= :ship))
         current-drag-loc @(subscribe [::drag-target id])]
     [:div.absolute {:style {:visibility (if dragging-unit :visible :hidden)}}
-     (for [[x y] (space-locations tile (if ship? :space :ground))
+     (for [[x y] (if ship? (space-locations planets)
+                           (all-planet-locations planets))
            :let [loc-center [(+ x (* 0.5 ship-location-size))
                              (+ y (* 0.5 ship-location-size))]]]
        (let [this-current? (= loc-center current-drag-loc)]
