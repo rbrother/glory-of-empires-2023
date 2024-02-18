@@ -3,7 +3,7 @@
             [glory-of-empires-2023.logic.utils
              :refer [mul-vec add-vec sub-vec distance attr=]]
             [glory-of-empires-2023.logic.tiles :as tiles]
-            [glory-of-empires-2023.logic.tile-ship-locs :refer [space-locations ground-locations]]))
+            [glory-of-empires-2023.logic.tile-ship-locs :refer [space-locations]]))
 
 (def all-unit-types-arr
   [{:id :fi :type :ship :name "Fighter" :individual-ids false
@@ -72,7 +72,7 @@
        (str (name ship-type))
        (keyword)))
 
-(defn choose-new-ship-offset [ship-type space-locs units-in-the-tile]
+(defn choose-new-ship-offset [ship-type available-locs units-in-the-tile]
   (let [unit-size (-> all-unit-types ship-type :image-size first)
         placement-value
         (fn [loc-offset]
@@ -83,7 +83,7 @@
                         (+ (when (< dist unit-size) (/ 20000 (inc dist))) ;; avoid overlap
                            (if same-type dist (- dist)))))) ;; try to keep same together ;; separate ones keep away
                (apply +)))]
-    (->> space-locs
+    (->> available-locs
          (map (fn [loc]
                 (let [loc-offset (sub-vec loc tiles/tile-center)]
                   {:loc loc-offset,
@@ -91,6 +91,19 @@
          (sort-by :placement-value)
          first
          :loc)))
+
+(defn arrange-unit [all-existing-units location-id target-locs {unit-type :type :as unit}]
+  (let [unit-id (or (:id unit) (free-id all-existing-units unit-type))
+        units-in-the-location (->> all-existing-units, vals
+                                   (filter (attr= :location location-id)))]
+    (assoc all-existing-units
+      unit-id (assoc unit
+                :id unit-id
+                :offset (choose-new-ship-offset unit-type target-locs units-in-the-location)))))
+
+(defn arrange-units-to-locs [existing-units location-id target-locs new-units]
+  (reduce #(arrange-unit %1 location-id target-locs %2)
+          existing-units new-units))
 
 (defn arrange-ships-to-tile [existing-units {tile-id :id, system :system :as tile} new-ships]
   (let [space-locs (space-locations (get tiles/all-systems system) :space)
@@ -106,17 +119,13 @@
     (reduce arrange-ship existing-units new-ships)))
 
 (defn arrange-units-to-planet [existing-units planet-id new-ships]
-  (let [ground-locs (ground-locations planet-id)
-        arrange-ship
+  (let [arrange-ship
         (fn [units {ship-type :type :as ship}]
-          (let [ship-id (or (:id ship) (free-id units ship-type))
-                units-in-the-planet (->> units (vals)
-                                         (filter (attr= :location planet-id)))]
+          (let [ship-id (or (:id ship) (free-id units ship-type))]
             (assoc units
-              ship-id (assoc ship
-                        :id ship-id
-                        :offset [0 0]                       ;;(choose-new-ship-offset ship-type ground-locs units-in-the-planet)
-                        ))))]
+              ship-id (assoc ship, :id ship-id
+                                   :offset [0 0] ;; Consider later making arrange-algoritm for ground locs
+                                   ))))]
     (reduce arrange-ship existing-units new-ships)))
 
 (defn create-ships [existing-units prod-counts {tile-id :id, :as tile} selected-planet owner]

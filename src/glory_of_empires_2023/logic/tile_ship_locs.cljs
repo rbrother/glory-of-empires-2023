@@ -25,24 +25,20 @@
        (mapcat (fn [{:keys [x y count]}]
                  (->> (range count)
                       (map (fn [n] [(+ x (* n ship-location-size)), y])))))
-       (vec)))
+       vec))
 
-(defn pos-on-planet [pos {planet-loc :loc radius :radius :as _planet}]
+(defn pos-on-planet? [pos {planet-loc :loc radius :radius :as _planet}]
   (< (distance (sub-vec pos (add-vec planet-loc tile-center)))
      (or radius 80)))
 
 (defn space-location? [pos planets]
-  (->> planets
-       vals
-       (not-any? #(pos-on-planet pos %))))
+  (->> planets, vals
+       (not-any? #(pos-on-planet? pos %))))
 
 ;; Does pos represent planet or the tile itself?
 (defn target-loc-id [pos {:keys [planets] :as tile}]
-  (let [planet (->> planets
-                    vals
-                    (filter (fn [{planet-loc :loc radius :radius}]
-                              (< (distance (sub-vec pos planet-loc))
-                                 (or radius 80))))
+  (let [planet (->> planets, vals
+                    (filter #(pos-on-planet? pos %))
                     first)]
     (or (:id planet) (:id tile))))
 
@@ -53,9 +49,4 @@
          (filter (fn [loc]
                    (invert?
                      (space-location? (add-vec loc target-center) planets))))
-         (vec))))
-
-(defn ground-locations [tile]
-  ;; TODO: IMPLEMENT
-  [0 0]
-  )
+         vec)))
