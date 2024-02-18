@@ -93,7 +93,7 @@
          :loc)))
 
 (defn arrange-ships-to-tile [existing-units {tile-id :id, system :system :as tile} new-ships]
-  (let [space-locs (space-locations (get tiles/all-systems system))
+  (let [space-locs (space-locations (get tiles/all-systems system) :space)
         arrange-ship
         (fn [units {ship-type :type :as ship}]
           (let [ship-id (or (:id ship) (free-id units ship-type))

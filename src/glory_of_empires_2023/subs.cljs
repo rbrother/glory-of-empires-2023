@@ -42,7 +42,8 @@
          (group-by :location))))
 
 (defn amend-planet [id planet all-units]
-  (assoc planet :units (get all-units id)))
+  (assoc planet :id id
+                :units (get all-units id)))
 
 (defn amend-tile [{:keys [id logical-pos system] :as tile} all-units]
   (let [units (get all-units id)]

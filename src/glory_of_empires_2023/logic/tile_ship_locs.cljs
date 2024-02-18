@@ -33,16 +33,28 @@
                (< (distance (sub-vec pos planet-loc)) 80)))
        (not)))
 
-(defn space-locations [tile]
+;; Does pos represent planet or the tile itself?
+(defn target-loc-id [pos {:keys [planets] :as tile}]
+  (let [planet (->> planets
+                    vals
+                    (filter (fn [{planet-loc :loc radius :radius}]
+                              (< (distance (sub-vec pos planet-loc))
+                                 (or radius 80))))
+                    first)]
+    (or (:id planet) (:id tile))))
+
+(defn space-locations [tile type]
   (let [planet-locs (->> tile (:planets) (vals) (map :loc)
                          (map #(add-vec % tile-center)))
-        target-center (mul-vec [ship-location-size ship-location-size] 0.5)]
+        target-center (mul-vec [ship-location-size ship-location-size] 0.5)
+        invert? (if (= type :space) identity not)]
     (->> drag-target-locs
          (filter (fn [loc]
-                   (space-location? (add-vec loc target-center) planet-locs)))
+                   (invert?
+                     (space-location? (add-vec loc target-center) planet-locs))))
          (vec))))
 
-(defn ground-locations [planet-id]
+(defn ground-locations [tile]
   ;; TODO: IMPLEMENT
   [0 0]
   )

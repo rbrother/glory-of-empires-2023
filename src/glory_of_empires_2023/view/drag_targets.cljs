@@ -2,19 +2,23 @@
   (:require
     [glory-of-empires-2023.debug :as debug]
     [glory-of-empires-2023.game-sync :as game-sync]
+    [glory-of-empires-2023.logic.ships :as ships]
     [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx
                            reg-sub inject-cofx]]
     [medley.core :refer [assoc-some dissoc-in]]
     [glory-of-empires-2023.logic.utils :refer [mul-vec add-vec sub-vec distance]]
     [glory-of-empires-2023.logic.tiles :refer [tile-center]]
-    [glory-of-empires-2023.logic.tile-ship-locs :refer [space-locations ship-location-size]]
+    [glory-of-empires-2023.logic.tile-ship-locs
+     :refer [space-locations ship-location-size target-loc-id]]
     [glory-of-empires-2023.view.ship :as ship]))
 
 (defn view [{id :id :as tile}]
-  (let [dragging-ship? @(subscribe [::ship/drag-unit])
+  (let [dragging-unit @(subscribe [::ship/drag-unit])
+        unit-type (some-> dragging-unit name (subs 0 2) keyword)
+        ship? (some-> unit-type (ships/all-unit-types) :type (= :ship))
         current-drag-loc @(subscribe [::drag-target id])]
-    [:div.absolute {:style {:visibility (if dragging-ship? :visible :hidden)}}
-     (for [[x y] (space-locations tile)
+    [:div.absolute {:style {:visibility (if dragging-unit :visible :hidden)}}
+     (for [[x y] (space-locations tile (if ship? :space :ground))
            :let [loc-center [(+ x (* 0.5 ship-location-size))
                              (+ y (* 0.5 ship-location-size))]
                  offset (sub-vec loc-center tile-center)]]
@@ -29,7 +33,7 @@
            :on-drag-enter #(do (.preventDefault %)
                                (dispatch [::drag-enter id loc-center]))
            :on-drag-over #(.preventDefault %)
-           :on-drop #(dispatch [::drop-on-tile tile offset])}]))]))
+           :on-drop #(dispatch [::drop-on-target tile offset])}]))]))
 
 ;; subs
 
@@ -45,12 +49,13 @@
     (assoc db :drag-target
               {:tile-id tile-id, :loc-center loc-center})))
 
-(reg-event-fx ::drop-on-tile [debug/log-event debug/validate-malli]
+(reg-event-fx ::drop-on-target [debug/log-event debug/validate-malli]
   (fn [{{:keys [drag-unit]} :db :as fx}
-       [_ {tile-id :id} drop-pos]]
-    (-> fx
-        (game-sync/update-game
-          (fn [game]
-            (update-in game [:units drag-unit]
-                       #(assoc % :location tile-id, :offset drop-pos))))
-        (dissoc-in [:db :drag-target]))))
+       [_ tile drop-pos]]
+    (let [target-loc (target-loc-id drop-pos tile)]
+      (-> fx
+          (game-sync/update-game
+            (fn [game]
+              (update-in game [:units drag-unit]
+                         #(assoc % :location target-loc, :offset drop-pos))))
+          (dissoc-in [:db :drag-target])))))
