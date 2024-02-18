@@ -20,8 +20,7 @@
     [:div.absolute {:style {:visibility (if dragging-unit :visible :hidden)}}
      (for [[x y] (space-locations tile (if ship? :space :ground))
            :let [loc-center [(+ x (* 0.5 ship-location-size))
-                             (+ y (* 0.5 ship-location-size))]
-                 offset (sub-vec loc-center tile-center)]]
+                             (+ y (* 0.5 ship-location-size))]]]
        (let [this-current? (= loc-center current-drag-loc)]
          ^{:key loc-center}
          [:div.ship-drop-loc
@@ -33,7 +32,7 @@
            :on-drag-enter #(do (.preventDefault %)
                                (dispatch [::drag-enter id loc-center]))
            :on-drag-over #(.preventDefault %)
-           :on-drop #(dispatch [::drop-on-target tile offset])}]))]))
+           :on-drop #(dispatch [::drop-on-target tile loc-center])}]))]))
 
 ;; subs
 
@@ -57,5 +56,6 @@
           (game-sync/update-game
             (fn [game]
               (update-in game [:units drag-unit]
-                         #(assoc % :location target-loc, :offset drop-pos))))
+                         #(assoc % :location target-loc 
+                                   :offset (sub-vec drop-pos tile-center)))))
           (dissoc-in [:db :drag-target])))))

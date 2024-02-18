@@ -1,5 +1,6 @@
 (ns glory-of-empires-2023.logic.tiles
   (:require [medley.core :refer [index-by]]
+            [cljs.pprint :refer [pprint]]
             [glory-of-empires-2023.logic.utils :refer [add-vec sub-vec mul-vec]]))
 
 (def tile-width 432)
@@ -461,3 +462,7 @@
     setup-systems-arr))
 
 (def all-systems (index-by :id all-systems-list))
+
+(def all-planets (->> all-systems-list
+                      (map :planets)
+                      (apply merge)))

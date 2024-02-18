@@ -1,6 +1,8 @@
 (ns glory-of-empires-2023.view.add-ships
   (:require
     [clojure.string :as str]
+    [cljs.pprint :refer [pprint]]
+    [glory-of-empires-2023.logic.tiles :as tiles]
     [re-frame.core :refer [subscribe dispatch reg-event-db reg-event-fx reg-sub]]
     [glory-of-empires-2023.logic.utils :refer [attr=]]
     [glory-of-empires-2023.game-sync :as game-sync]
@@ -135,12 +137,15 @@
   (fn [{{:keys [selected-tile selected-planet]
          {:keys [prod-counts]} :add-ships
          {:keys [board current-player]} :game} :db :as fx} _]
-    (-> fx
-        (game-sync/update-game
-          (fn [game]
-            (update game :units
-                    #(ships/create-ships % prod-counts (get board selected-tile) selected-planet current-player))))
-        (update :db #(dissoc % :dialog :add-ships :selected-tile)))))
+    (let [tile (get board selected-tile)
+          planet (some-> selected-planet, tiles/all-planets
+                         (assoc :id selected-planet))]
+      (-> fx
+          (game-sync/update-game
+            (fn [game]
+              (update game :units
+                      #(ships/create-ships % prod-counts tile planet current-player))))
+          (update :db #(dissoc % :dialog :add-ships :selected-tile))))))
 
 (reg-event-db ::cancel [debug/log-event debug/validate-malli]
   (fn [db _] (dissoc db :dialog :add-ships :selected-tile)))
