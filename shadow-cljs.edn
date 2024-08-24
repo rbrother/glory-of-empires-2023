@@ -2,22 +2,30 @@
 
  :source-paths ["src" "test"]
 
- :dependencies
- [[reagent "1.2.0"]
-  [re-frame "1.4.2"]
-  [garden "1.3.10"]
-  [dev.weavejester/medley "1.5.0"]
-  [net.dhleong/spade "1.1.0"]
-  [metosin/malli "0.10.3"]
-  [metosin/reagent-dev-tools "1.0.0"]
-  [re-frame-utils "0.1.0"]
-  [com.andrewmcveigh/cljs-time "0.5.2"]
-  [hashp "0.2.2"]
-  [binaryage/devtools "1.0.6"]
-  [camel-snake-kebab "0.4.3"]
-  [juji/editscript "0.6.3"]
-  [nilenso/wscljs "0.2.0"]
-  [com.rpl/specter "1.1.4"]
+ :dependencies ;; Most recently released first
+ [;; 2024
+  [dev.weavejester/medley "1.8.1"] ;; Misc small functions. Released 2024-07, latest version as of 2024-08
+  [net.dhleong/spade "2.0.0"] ;; Extras for Medley lib. Released 2024-07, latest version as of 2024-08
+  [metosin/malli "0.16.3"] ;; Validation of data based on schema. Released 2024-07, latest version as of 2024-08
+  [re-frame "1.4.3"] ;; Released 2024-01, latest version as of 2024-08
+  ;; 2023
+  [reagent "1.2.0"] ;; React wrapper. Released 2023-02, latest version as of 2024-08
+  [binaryage/devtools "1.0.7"] ;; Chrome tools. Released 2023-04, latest version as of 2024-08
+  [juji/editscript "0.6.3"] ;; Editing data structures. Released 2023-03, latest version as of 2024-08
+  ;; 2022
+  [com.rpl/specter "1.1.4"] ;; Functional tools. Released 2022-03, latest version as of 2024-08
+  [metosin/reagent-dev-tools "1.0.0"] ;; Debug of state. Releases 2022-04, latest version as of 2024-08
+  [hashp "0.2.2"] ;; Debug print. Released 2022-10, latest version as of 2024-08
+  [camel-snake-kebab "0.4.3"] ;; Case-conversions. Released 2022-05, latest version as of 2024-08
+  ;; 2021
+  ;; 2020
+  [garden "1.3.10"] ;; CSS for CLJS. Released 2020-05, latest version as of 2024-08
+  ;; 2019
+  [nilenso/wscljs "0.2.0"] ;; WebSocket client. Released 2019-05, latest version as of 2024-08
+  ;; 2018
+  ;; 2017
+  [re-frame-utils "0.1.0"] ;; Releases 2017-10, latest version as of 2024-08
+  [com.andrewmcveigh/cljs-time "0.5.2"] ;; JS time wrapper. Released 2017-11, latest version as of 2024-08
   ]
 
  :dev-http
