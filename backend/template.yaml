@@ -17,12 +17,14 @@ Parameters:
     ConstraintDescription: 'Required. Can be characters and underscore only. No numbers or special characters allowed.'
 
 Resources:
+
   SimpleChatWebSocket:
     Type: AWS::ApiGatewayV2::Api
     Properties:
       Name: SimpleChatWebSocket
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: "$request.body.action"
+
   ConnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -34,6 +36,7 @@ Resources:
         - '/'
         - - 'integrations'
           - !Ref ConnectInteg
+
   ConnectInteg:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -43,6 +46,7 @@ Resources:
       IntegrationUri: 
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnConnectFunction.Arn}/invocations
+
   DisconnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -54,6 +58,7 @@ Resources:
         - '/'
         - - 'integrations'
           - !Ref DisconnectInteg
+
   DisconnectInteg:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -63,6 +68,7 @@ Resources:
       IntegrationUri: 
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnDisconnectFunction.Arn}/invocations
+
   SendRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -74,6 +80,7 @@ Resources:
         - '/'
         - - 'integrations'
           - !Ref SendInteg
+
   SendInteg:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -83,6 +90,7 @@ Resources:
       IntegrationUri: 
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SendMessageFunction.Arn}/invocations
+
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
@@ -91,6 +99,7 @@ Resources:
     - DisconnectRoute
     Properties:
       ApiId: !Ref SimpleChatWebSocket
+
   Stage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
@@ -98,6 +107,7 @@ Resources:
       Description: Prod Stage
       DeploymentId: !Ref Deployment
       ApiId: !Ref SimpleChatWebSocket
+
   ConnectionsTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -111,6 +121,7 @@ Resources:
       SSESpecification:
         SSEEnabled: True
       TableName: !Ref TableName
+
   OnConnectFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -124,6 +135,7 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref TableName
+
   OnConnectPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
@@ -132,6 +144,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref OnConnectFunction
       Principal: apigateway.amazonaws.com
+
   OnDisconnectFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -145,6 +158,7 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref TableName
+
   OnDisconnectPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
@@ -153,6 +167,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref OnDisconnectFunction
       Principal: apigateway.amazonaws.com
+
   SendMessageFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -172,6 +187,7 @@ Resources:
           - 'execute-api:ManageConnections'
           Resource:
           - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SimpleChatWebSocket}/*'
+
   SendMessagePermission:
     Type: AWS::Lambda::Permission
     DependsOn:
@@ -180,6 +196,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref SendMessageFunction
       Principal: apigateway.amazonaws.com
+
   GamesTable:
     Type: AWS::DynamoDB::Table
     Properties:
