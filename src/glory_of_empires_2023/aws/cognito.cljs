@@ -1,13 +1,13 @@
 (ns glory-of-empires-2023.aws.cognito
   (:require
-    [re-frame.core :refer [reg-event-fx dispatch]]
+    [camel-snake-kebab.core :as csk]
     [clojure.string :as str]
     ["jwt-decode" :as jwt-decode]
-    [medley.core :refer [map-keys]]
-    [camel-snake-kebab.core :as csk]
     [glory-of-empires-2023.aws.core :as aws]
+    [glory-of-empires-2023.debug :as debug :refer [log]]
     [glory-of-empires-2023.game-sync :as game-sync]
-    [glory-of-empires-2023.debug :as debug :refer [log]]))
+    [medley.core :refer [map-keys]]
+    [re-frame.core :refer [dispatch reg-event-fx]]))
 
 ;; Example hosted UI URL:
 ;; https://<your_domain>/oauth2/authorize?response_type=code&client_id=<your_app_client_id>&redirect_uri=<your_callback_url>
@@ -62,13 +62,14 @@
 
 (defn redirect-to-cognito-login [db]
   (let [redirect-url (-> js/window (.-location) (.-href))
-        login-url (str "https://glory-of-empires.auth.eu-north-1.amazoncognito.com/login?"
-                       "client_id=" (:app-client-id config) "&"
-                       "response_type=" (:response-type config) "&"
-                       "scope=" (:scope config) "&"
-                       "redirect_uri=" (js/encodeURIComponent redirect-url))]
-    (log [:cognito-login-url login-url])
-    (js/setTimeout (fn [] (redirect login-url)) 1000)       ;; Allow time to read the log
+        cognito-url (str "https://glory-of-empires.auth.eu-north-1.amazoncognito.com/login?"
+                         "client_id=" (:app-client-id config) "&"
+                         "response_type=" (:response-type config) "&"
+                         "scope=" (:scope config) "&"
+                         "redirect_uri=" (js/encodeURIComponent redirect-url))]
+    (-> js/navigator .-clipboard (.writeText cognito-url))
+    (log "Copied redirect URL to clipboard")
+    (js/setTimeout (fn [] (redirect cognito-url)) 2000) ;; Allow time to read the log
     db))
 
 (defn credentials-object-from-token [id-token]
@@ -92,10 +93,11 @@
 (reg-event-fx ::login [debug/log-event debug/validate-malli]
   (fn [{db :db} _]
     (let [tokens (token-params)]
-      (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL after reading it
       (if (:id-token tokens)
-        {:db (store-tokens db tokens)
-         :dispatch [::game-sync/create-websocket]
-         :dispatch-later {:ms aws/mins-30 :dispatch [::aws/renew-credentials]}}
+        (do
+          (-> js/window (.-history) (.pushState "" "" "/prod/")) ;; Remove the token from URL after reading it
+          {:db (store-tokens db tokens)
+           :dispatch [::game-sync/create-websocket]
+           :dispatch-later {:ms aws/mins-30 :dispatch [::aws/renew-credentials]}})
         {:db (redirect-to-cognito-login db)}))))
 

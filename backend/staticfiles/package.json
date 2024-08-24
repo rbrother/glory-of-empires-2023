@@ -1,0 +1,10 @@
+{
+  "name": "staticfiles",
+  "version": "1.0.0",
+  "description": "Service static files (like the UI JS app) through HTTP Api",
+  "main": "app.js",
+  "author": "Robert Brotherus",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

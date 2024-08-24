@@ -18,6 +18,25 @@ Parameters:
 
 Resources:
 
+  StaticFilesHTTPApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Name: StaticFilesHTTPApi
+      StageName: prod
+
+  StaticFilesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: staticfiles/
+      Handler: app.handler
+      MemorySize: 256
+      Runtime: nodejs18.x
+      Events:
+        MyApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StaticFilesHTTPApi
+
   SimpleChatWebSocket:
     Type: AWS::ApiGatewayV2::Api
     Properties:
@@ -231,3 +250,7 @@ Outputs:
   WebSocketURI:
     Description: "The WSS Protocol URI to connect to"
     Value: !Join [ '', [ 'wss://', !Ref SimpleChatWebSocket, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/',!Ref 'Stage'] ]
+
+  StaticApiUrl:
+    Description: "HTTP API Endpoint URL for static files"
+    Value: !Sub "https://${StaticFilesHTTPApi}.execute-api.${AWS::Region}.amazonaws.com/prod/<path-to-file>"
