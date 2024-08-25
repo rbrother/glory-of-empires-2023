@@ -95,7 +95,7 @@
     (let [tokens (token-params)]
       (if (:id-token tokens)
         (do
-          (-> js/window (.-history) (.pushState "" "" "/prod/")) ;; Remove the token from URL after reading it
+          (-> js/window (.-history) (.pushState "" "" "/")) ;; Remove the token from URL after reading it
           {:db (store-tokens db tokens)
            :dispatch [::game-sync/create-websocket]
            :dispatch-later {:ms aws/mins-30 :dispatch [::aws/renew-credentials]}})

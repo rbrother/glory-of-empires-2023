@@ -22,7 +22,6 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       Name: StaticFilesHTTPApi
-      StageName: prod
 
   StaticFilesFunction:
     Type: AWS::Serverless::Function
@@ -253,4 +252,4 @@ Outputs:
 
   StaticApiUrl:
     Description: "HTTP API Endpoint URL for static files"
-    Value: !Sub "https://${StaticFilesHTTPApi}.execute-api.${AWS::Region}.amazonaws.com/prod/<path-to-file>"
+    Value: !Sub "https://${StaticFilesHTTPApi}.execute-api.${AWS::Region}.amazonaws.com/<path-to-file>"

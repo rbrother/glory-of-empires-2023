@@ -2,9 +2,8 @@ var fs = require('fs')
 
 exports.handler = async event => {
     try {
-        const rawPath = event.rawPath // Eg. "/prod/fdofkdofkdofk/fdfdfdjf"
-        var path = rawPath.substring(6) // Eg. "fdofkdofkdofk/fdfdfdjf"
-        if (path === "") { path = "/index.html" }
+        let path = event.rawPath // Eg. "/fdofkdofkdofk/fdfdfdjf"
+        if (path === "" || path === "/") { path = "/index.html" }
         path = `files/${path}`
         const extension = path.split('.').pop()
         const contentType = 
