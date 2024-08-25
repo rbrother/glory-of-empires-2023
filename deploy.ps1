@@ -3,6 +3,6 @@ npm install
 Remove-Item -Path ".\backend\staticfiles\files\js\compiled" -Recurse
 npm run release
 cd .\backend
-# Deploys to 'staticfiles' lambda at URL https://3jcv5yd21l.execute-api.eu-north-1.amazonaws.com/prod/
+# Deploys to 'staticfiles' lambda at URL https://3jcv5yd21l.execute-api.eu-north-1.amazonaws.com/
 sam deploy
 cd ..
