@@ -15,4 +15,4 @@
 /.shadow-cljs/
 /.clj-kondo/.cache/
 /.idea/
-/backend/staticfiles/files/
+/backend/staticfiles/files/js/compiled/
