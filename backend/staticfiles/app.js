@@ -8,15 +8,31 @@ exports.handler = async event => {
         const extension = path.split('.').pop()
         const contentType = 
             (extension == "html" || extension == "htm") ? "text/html" :
-            (extension == "js") ? "text/javascript" : "text/plain"         
-        const data = fs.readFileSync(path, 'utf8')
+            (extension == "js") ? "text/javascript" : 
+            (extension == "ico") ? "image/vnd.microsoft.icon" :
+            "text/plain"         
+        // Read the file as binary data
+        const data = fs.readFileSync(path);
+            
+        let bodyStr;
+        let isBinary;
+
+        // Check if the file should be served as binary
+        if (extension === "ico") {
+            bodyStr = data.toString('base64'); // Encode binary data to base64
+            isBinary = true;
+        } else {
+            bodyStr = data.toString('utf8'); // Convert text files to UTF-8 string
+            isBinary = false;
+        }        
         return { 
             statusCode: 200, 
             headers: {
                 'Content-Type': contentType
-                // content-encoding: gzip
             },
-            body: data }
+            body: bodyStr,
+            isBase64Encoded: isBinary 
+        }
     } catch(e) {
         return { statusCode: 500, body: e.stack }
     }
